@@ -1,0 +1,348 @@
+﻿
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>手机报工</title>
+    <link rel="shortcut icon" href="/Image/bitbug_favicon.ico">
+    <link href="~/assets/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/assets/css/font-awesome.css" rel="stylesheet" />
+    <link href="~/Css/04_02_phone.css" rel="stylesheet" />
+    <link href="~/Css/04_02_phone_min_paid.css" rel="stylesheet" />
+    <link href="~/Css/04_02-phone_control.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="Wrapper" id="Wrapper" v-cloak>
+        <div class="component_box" v-bind:class="{'open':component}" v-on:click="componentClose($event)">
+            <div :is="component_item.component_name" v-if="component_item.component_name=='messageBox'" v-bind:resname="content_title"></div>
+            <div :is="component_item.component_name" v-if="component_item.component_name=='modelBox' || component_item.component_name=='startMode'|| component_item.component_name=='parseBox'" v-bind:plan="cur_plan"></div>
+            <div :is="component_item.component_name" v-if="component_item.component_name=='featuresBox'" v-bind:user="user_message"></div>
+            <div :is="component_item.component_name" v-if="component_item.component_name=='alertBox'" v-bind:alertmessage="alert_title"></div>
+        </div>
+        <div class="nav_box" v-bind:class="{'menu_close':menu_close}">
+            <div class="nav_icon">
+                <span class="home"></span>
+                <span v-bind:class="{'menu_icon':true,'fa':true,'fa-align-right':!menu_close,'fa-align-left':menu_close}"
+                      v-on:click="sc_menu"></span>
+            </div>
+            <div class="nav_content">
+                <ul>
+                    <li>
+                        <p>
+                            <span class="icon fa fa-tachometer"></span>
+                            <span class="nav_name">执行概况</span>
+                        </p>
+                    </li>
+                    <li v-bind:class="{'res_open':angle_icon_open}">
+                        <p v-on:click="res_list_click">
+                            <span class="icon fa fa-folder"></span>
+                            <span class="nav_name">设备列表</span>
+                            <span v-bind:class="{'angle_icon':true,'fa':true,'fa-angle-right':!angle_icon_open,'fa-angle-down':angle_icon_open}"></span>
+                        </p>
+                        <ul class="resbox">
+                            <li v-bind:class="{'resActive':menu_index==0?true:false}" v-for="(menu_item,menu_index) in menu_list">
+                                <p v-on:click="res_group_click(menu_index,$event)">
+                                    <span v-text="menu_item.viewName"></span>
+                                    <span v-bind:class="{'angle_icon':true,'fa':true,'fa-angle-right':!child_active[menu_index],'fa-angle-down':child_active[menu_index]}" v-if="menu_item.resName"></span>
+                                </p>
+                                <ul class="res_list" v-if="menu_item.resName" v-bind:class="{'open':child_active[menu_index]}">
+                                    <li v-for="(res_list,res_index) in menu_item.resName" v-bind:title="res_list" v-on:click="res_click($event)">
+                                        <p v-text="res_list" v-bind:class="{'resourceActive':menu_index==0&&res_index==0?true:false}"></p>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div v-bind:class="{'content_box':true,'large_content_box':menu_close}">
+            <!--<component is="modelBox"></component>-->
+            <div class="title_box">
+                <h2 class="title">RateFactory移动报工系统</h2>
+                <div class="title_icon">
+                    <div class="comment" v-on:click="components_btn_click('messageBox')">
+                        <p class="comment_icon fa fa-firefox"></p>
+                        <p class="comment_text">异常处理</p>
+                    </div>
+                    <div class="comment" v-on:click="components_btn_click('messageBox')">
+                        <p class="comment_icon fa fa fa-comment"></p>
+                        <p class="comment_text">消息队列</p>
+                    </div>
+                    <div class="user" v-on:click="components_btn_click('featuresBox')">
+                        <p class="user_icon fa fa-user-circle-o"></p>
+                        <p class="user_text" v-text="user_message.empName"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="main">
+                <div class="main_title">
+                    <p class="message_title">
+                        <span class="message_icon fa fa-home"></span>
+                        <span v-text="'执行概况 =>'+content_title"></span>
+                    </p>
+                </div>
+                <div class="container-fluid view">
+                    <div class="row">
+                        <div class="col-sm-4 cur_product_box">
+                            <div class="product_cotent">
+                                <p class="product_title">
+                                    <span class="product_icon fa fa-star"></span>
+                                    <span>执行状态:</span>
+                                    <span class="status">正在生产</span>
+                                </p>
+                                <div class="product_content_box">
+                                    <p class="cur_product_workId">
+                                        <span v-text="'工单号码:'"></span>
+                                        <span v-text="cur_product_work==undefined||Object.keys(cur_product_work).length==0?'无':cur_product_work.workID"></span>
+                                    </p>
+                                    <p class="res_name">
+                                        <span v-text="'工序名称:'"></span>
+                                        <span v-text="cur_product_work==undefined||Object.keys(cur_product_work).length==0?'无':cur_product_work.opName||cur_product_work.pmOpName"></span>
+                                    </p>
+                                    <p class="planqty">
+                                        <span v-text="'计划数量:'"></span>
+                                        <span v-text="cur_product_work==undefined||Object.keys(cur_product_work).length==0?'无':cur_product_work.planQty||cur_product_work.plannedqty"></span>
+                                    </p>
+                                    <p class="desc">
+                                        <span v-text="'描述:'"></span>
+                                        <span v-text="cur_product_work==undefined||Object.keys(cur_product_work).length==0?'无':cur_product_work.description||cur_product_work.itemAttr1"></span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 cur_product_detail">
+                            <ul>
+                                <li>
+                                    <span class="icon_tags fa fa-tags"></span>
+                                    <span class="detail_message">
+                                        <span v-text="'工单总数:'"></span>
+                                        <span v-text="cur_product_work==undefined||Object.keys(cur_product_work).length==0?'无':cur_product_work.jobQty"></span>
+                                    </span>
+                                </li>
+                                <li>
+                                    <span class="icon_tags fa fa-tags"></span>
+                                    <span class="detail_message">
+                                        <span v-text="'交货日期:'"></span>
+                                        <span v-text="cur_product_work==undefined||Object.keys(cur_product_work).length==0?'无':cur_product_work.mesDate"></span>
+                                    </span>
+                                </li>
+                                <li>
+                                    <span class="icon_tags fa fa-tags"></span>
+                                    <span class="detail_message">
+                                        <span v-text="'计划开始时间:'"></span>
+                                        <span v-text="cur_product_work==undefined||Object.keys(cur_product_work).length==0?'无':cur_product_work.mesStartTime||cur_product_work.StartTime"></span>
+                                    </span>
+                                </li>
+                                <li>
+                                    <span class="icon_tags fa fa-tags"></span>
+                                    <span class="detail_message">
+                                        <span v-text="'计划结束时间:'"></span>
+                                        <span v-text="cur_product_work==undefined||Object.keys(cur_product_work).length==0?'无':cur_product_work.mesEndTime||cur_product_work.EndTime"></span>
+                                    </span>
+                                </li>
+                                <li>
+                                    <span class="icon_tags fa fa-tags"></span>
+                                    <span class="detail_message">
+                                        <span v-text="'累计完成数量:'"></span>
+                                        <span v-text="cur_product_work==undefined||Object.keys(cur_product_work).length==0?'无':cur_product_work.finishedQty"></span>
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-sm-4 statistics_box" style="position:relative">
+                            <div style="position:absolute;top:50%;transform:translateY(-50%);width:100%;padding-right:30px;">
+                                <div class="statistics_content">
+                                    <div class="finish_num">
+                                        <p class="number">1000</p>
+                                        <p class="statistics_title">本设备完成</p>
+                                    </div>
+                                    <div class="bad_num">
+                                        <p class="number">12</p>
+                                        <p class="statistics_title">累计不良数</p>
+                                    </div>
+                                    <div class="finish_num">
+                                        <p class="number">10823</p>
+                                        <p class="statistics_title">累计完成数</p>
+                                    </div>
+                                </div>
+                                <div class="progress">
+                                    <span class="num_add">
+                                        1000/6984
+                                    </span>
+                                    <div class="progress-bar" style="width:40%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab_box">
+                    <a href="#" class="tab_active" v-on:click="tab_left_click">待生产工单</a>
+                    <a href="#" v-on:click="tab_right_click">已完成工单</a>
+                </div>
+                <div class="work_box container-fluid">
+                    <div v-bind:class="{'tab_wrap':true,'right':tab_right}">
+                        <div class="undone_box row">
+                            <div class="content_left col-sm-5">
+                                <div class="btn_box">
+                                    <button class="start_work" v-on:click="start_btn" v-text="btn_start"></button>
+                                    <button class="btn" style="float: right;" v-on:click="parse_btn_click" 　v-bind:class="{'btn-dark':cur_plan.taskFinishState == '5','parse_work':cur_plan.taskFinishState != '5'}">生产暂停</button>
+                                </div>
+                                <div class="cur_work_message">
+                                    <p class="cur_workId" v-text="'工单号码:'+cur_plan.workID" v-if="cur_plan.workID"></p>
+                                    <p class="cur_workId" v-text="'工单号码:无'" v-else></p>
+                                    <ul class="cur_message">
+                                        <li class="cur_resName">
+                                            <span class="fa fa-exclamation-circle"></span>
+                                            <span v-if="cur_plan.pmOpName" v-text="'工序名称:'+cur_plan.pmOpName"></span>
+                                            <span v-text="'工序名称:无'" v-else></span>
+                                        </li>
+                                        <li class="cur_planqty">
+                                            <span class="fa fa-exclamation-circle"></span>
+                                            <span v-if="cur_plan.plannedqty" v-text="'计划数量:'+cur_plan.plannedqty"></span>
+                                            <span v-text="'计划数量:无'" v-else></span>
+                                        </li>
+                                        <li>
+                                            <span class="fa fa-exclamation-circle"></span>
+                                            <span v-if="cur_plan.jobQty" v-text="'工单总数:'+cur_plan.jobQty"></span>
+                                            <span v-text="'工单总数:无'" v-else></span>
+                                        </li>
+                                        <li>
+                                            <span class="fa fa-exclamation-circle"></span>
+                                            <span v-if="cur_plan.StartTime" v-text="'计划开始时间:'+cur_plan.StartTime"></span>
+                                            <span v-text="'计划开始时间:无'" v-else></span>
+                                        </li>
+                                        <li>
+                                            <span class="fa fa-exclamation-circle"></span>
+                                            <span v-if="cur_plan.EndTime" v-text="'计划结束时间:'+cur_plan.EndTime"></span>
+                                            <span v-text="'计划结束时间:无'" v-else></span>
+                                        </li>
+                                        <li>
+                                            <span class="fa fa-exclamation-circle"></span>
+                                            <span v-if="cur_plan.itemAttr1" v-text="'属性1:'+cur_plan.itemAttr1"></span>
+                                            <span v-text="'属性1:无'" v-else></span>
+                                        </li>
+                                        <li>
+                                            <span class="fa fa-exclamation-circle"></span>
+                                            <span v-if="cur_plan.itemAttr2" v-text="'属性2:'+cur_plan.itemAttr2"></span>
+                                            <span v-text="'属性2:无'" v-else></span>
+                                        </li>
+                                        <li>
+                                            <span class="fa fa-exclamation-circle"></span>
+                                            <span v-if="cur_plan.itemAttr3" v-text="'属性3:'+cur_plan.itemAttr3"></span>
+                                            <span v-text="'属性3:无'" v-else></span>
+                                        </li>
+                                        <li>
+                                            <span class="fa fa-exclamation-circle"></span>
+                                            <span v-if="cur_plan.itemAttr4" v-text="'属性4:'+cur_plan.itemAttr4"></span>
+                                            <span v-text="'属性4:无'" v-else></span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="content_right col-sm-7">
+                                <ul class="undone_work">
+                                    <li v-on:click="undone_work_li_click(undoneIndex,$event)" v-for="(undones,undoneIndex) in plan_list['undone']" v-bind:class="{'undone_active':undoneIndex==0?true:false}">
+                                        <div class="work_message">
+                                            <div>
+                                                <p class="important_text">
+                                                    <span v-text="'工单号码:'+undones.workID"></span>
+                                                    <span v-text="'工序:'+undones.pmOpName"></span>
+                                                    <span v-text="'计划数量'+undones.plannedqty"></span>
+                                                    <span v-text="'工单总数'+undones.jobQty"></span>
+                                                </p>
+                                                <p>
+                                                    <span v-text="'计划开始时间:'+undones.StartTime"></span>
+                                                    <span v-text="'计划结束时间:'+undones.EndTime">计划结束时间: 04/02 20:00:00</span>
+                                                    <span v-text="'描述:'+undones.itemAttr1"></span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="row done_box">
+                            <div class="content_left col-sm-5">
+                                <div class="cur_work_message">
+                                    <p class="cur_workId">
+                                        工单号码:1000002868_21
+                                    </p>
+                                    <ul class="cur_message">
+                                        <li class="cur_resName">
+                                            <span class="fa fa-exclamation-circle"></span>
+                                            <span>工序名称:断料</span>
+                                        </li>
+                                        <li class="cur_planqty">
+                                            <span class="fa fa-exclamation-circle"></span>
+                                            <span>计划数量:5000</span>
+                                        </li>
+                                        <li>
+                                            <span class="fa fa-exclamation-circle"></span>
+                                            <span>工单总数:186520</span>
+                                        </li>
+                                        <li>
+                                            <span class="fa fa-exclamation-circle"></span>
+                                            <span>计划开始时间: 04/02 17:00:00</span>
+                                        </li>
+                                        <li>
+                                            <span class="fa fa-exclamation-circle"></span>
+                                            <span>计划结束时间: 04/02 20:00:00</span>
+                                        </li>
+                                        <li>
+                                            <span class="fa fa-exclamation-circle"></span>
+                                            <span>属性1:Q330</span>
+                                        </li>
+                                        <li>
+                                            <span class="fa fa-exclamation-circle"></span>
+                                            <span>属性2:全金属</span>
+                                        </li>
+                                        <li>
+                                            <span class="fa fa-exclamation-circle"></span>
+                                            <span>属性3:六角法兰面锁紧螺母</span>
+                                        </li>
+                                        <li>
+                                            <span class="fa fa-exclamation-circle"></span>
+                                            <span>描述:Q330 全金属六角法兰面锁紧螺母</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="content_right col-sm-7">
+                                <ul class="undone_work">
+                                    <li v-for="(finish,finishIndex) in plan_list['finish']">
+                                        <div class="work_message">
+                                            <div>
+                                                <p class="important_text">
+                                                    <span v-text="'工单号码:'+finish.workID"></span>
+                                                    <span v-text="'工序:'+finish.pmOpName"></span>
+                                                    <span v-text="'计划数量:'+finish.plannedqty"></span>
+                                                    <span v-text="'工单总数'+finish.jobQty"></span>
+                                                </p>
+                                                <p>
+                                                    <span v-text="'计划开始时间:'+finish.StartTime"></span>
+                                                    <span v-text="'计划结束时间:'+finish.EndTime"></span>
+                                                    <span v-text="'描述:'+finish.itemAttr1"></span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="~/assets/js/jquery.js"></script>
+    <script src="~/js/vue.js"></script>
+    <script src="~/js/04_02_phone_conpoment.js"></script>
+    <script src="~/js/04_02_phone.js"></script>
+</body>
+</html>

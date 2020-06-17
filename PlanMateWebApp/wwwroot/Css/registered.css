@@ -1,0 +1,169 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+[v-cloak] {
+    display: none;
+}
+html, body, .wraper-registered {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, #0052D4, #65C7F7, #9CECFB);
+}
+
+.registered-box {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    width: 60%;
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0.5rem 1rem 0 rgba(0, 0, 0, 0.5);
+    border-radius: 20px;
+}
+
+.registered-box .img-box {
+    position: relative;
+    width: 50%;
+    height: 341px;
+    float: left;
+    background-image: url("../Image/timg.jpg");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    border-radius: 20px 0 0 20px;
+}
+
+.img-box .img-content {
+    position: absolute;
+    left: 50%;
+    top: 25%;
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+    transform: translateX(-50%);
+}
+
+.img-box .logo {
+    width: 240px;
+}
+
+.img-box .img-title {
+    text-align: center;
+    color: white;
+    font-size: 1rem;
+}
+
+.registered-box .resign-content {
+    float: left;
+    width: 50%;
+}
+
+.resign-content .input-box {
+    width: 80%;
+    margin: 5px auto;
+}
+
+.input-box .input-title {
+    text-align: center;
+    font-size: 1.5em;
+}
+
+.input-box .form-control {
+    margin: 5px 0;
+}
+
+.resign-content .user-Occupation {
+    color: #626262;
+    margin-bottom: 0;
+}
+
+.input-box .btn-box {
+    width: 215px;
+    margin: 8px auto;
+    /*margin-top: 56px;*/
+}
+
+.btn-box input {
+    width: 100px;
+}
+
+.input-box .message {
+    margin-bottom: 0;
+    font-size: 14px;
+    word-break: keep-all; /* 不换行 */
+    white-space: nowrap; /* 不换行 */
+    overflow: hidden; /* 内容超出宽度时隐藏超出部分的内容 */
+    text-overflow: ellipsis;
+    color: red;
+}
+
+.cutsom-checkbox-row input[type="checkbox"] + label {
+    padding-left: 6px;
+}
+
+.che-box {
+    list-style: none;
+    float: left;
+    margin-left: 8px
+}
+.che-boxs::after{
+    display: block;
+    content: '';
+    clear: both;
+}
+@media screen and (max-width: 1339px) {
+    .img-box {
+        display: none;
+    }
+
+    .resign-content {
+        width: 100% !important;
+    }
+}
+
+@media screen and (max-width: 740px) {
+    .registered-box {
+        width: 90%;
+    }
+}
+
+
+
+
+input[type=checkbox] {
+    margin-right: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    width: 15px;
+    height: 12px;
+    position: relative;
+}
+
+    input[type=checkbox]:after {
+        position: absolute;
+        width: 15px;
+        height: 15px;
+        top: 0;
+        content: " ";
+        color: #fff;
+        display: inline-block;
+        visibility: visible;
+        padding: 0px 2px;
+        border-radius: 3px;
+        background: #FFFFFF;
+        border: 1px solid #DDDDDD;
+    }
+
+    input[type=checkbox]:checked:after {
+        content: "✓";
+        line-height:12px;
+        font-size: 12px;
+        font-weight: 600;
+        background-color: #36AEFF;
+    }
+

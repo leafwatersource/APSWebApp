@@ -1,0 +1,130 @@
+﻿@model PlanMateWebApp.Models.MDatacenter
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <link rel="shortcut icon" href="~/Image/bitbug_favicon.ico" />
+    <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/bootstrap-table/1.15.3/bootstrap-table.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/font-awesome/5.6.3/css/all.min.css" rel="stylesheet">
+    <link href="~/Css/loading.css" rel="stylesheet" />
+    <link href="~/Css/orderConfirm.css" rel="stylesheet" />
+    <link href="~/Css/Filter.css" rel="stylesheet" />
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap-table/1.15.3/bootstrap-table.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap-table/1.15.3/locale/bootstrap-table-zh-CN.min.js"></script>
+    <script src="https://cdn.bootcss.com/popper.js/1.15.0/umd/popper.min.js"></script>
+    <script src="https://cdn.bootcss.com/echarts/4.2.1/echarts.min.js"></script>
+    <script src="~/js/MyToolFn.js"></script>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="top container-fluid">
+            <div class="title">
+                <p>
+                    @ViewBag.Title - PlanMateAps
+                    <span class="min-span"><i class="fa fa-bars" aria-hidden="true"></i></span>
+                    <span class="max-span"><i class="fa fa-bars" aria-hidden="true"></i></span>
+                </p>
+            </div>
+            <div class="user">
+                <div class="nav-item">
+                    <a href="javascript:void(0)" id="user">
+                        <i class="fas fa-user-circle" aria-hidden="true"></i>
+                    </a>
+                    <ul class="userSeting">
+                        <li><a class="seting-item" href="/Administrator/Usersetting">用户设置</a></li>
+                        <li><a class="seting-item" href="/Administrator/Index" id="Record">登陆记录</a></li>
+                        <li><a class="seting-item" href="javascript:void(0)" data-toggle="modal" data-target="#myModal">退出</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal fade" id="myModal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">确定要退出吗？</h4>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            退出后要重新登陆
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" id="btnlogout" class="btn btn-secondary" data-dismiss="modal">退出登陆</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid main">
+            <div class="row con">
+                <div class="Mynav">
+                    <ul>
+                        <li class="nav-link logoBox">
+                            <a href="javascript:void(0)">
+                                <img src="../Image/logo-white.png" id="logo" />
+                            </a>
+                        </li>
+                        <li class="nav-link active">
+                            <a href="/DataCenter/Index">
+                                <i class="fas fa-glass-martini mr-1" aria-hidden="true"></i><span>订单查询</span>
+                            </a>
+                        </li>
+                        <li class="nav-link">
+                            <a href="/DataCenter/Implementation">
+                                <i class="fas fa-table mr-1" aria-hidden="true">
+                                </i><span>执行计划</span>
+                            </a>
+                        </li>
+                        <li class="nav-link">
+                            <a href="/Materials/Index">
+                                <i class="fas fa-cubes mr-1" aria-hidden="true">
+                                </i><span>物料管理</span>
+                                <i class="fas fa-angle-right" aria-hidden="true"></i>
+                            </a>
+                            <ul class="navChild">
+                                <li><a href="/Materials/Index">物料需求</a></li>
+                                <li><a href="/Materials/ArrearsList">欠料表</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-link">
+                            <a href="/DataCenter/HistoryData">
+                                <i class="fas fa-history mr-1" aria-hidden="true" style=""></i>
+                                <span>历史数据</span>
+                                <i class="fas fa-angle-right" aria-hidden="true"></i>
+                            </a>
+                            <ul class="navChild">
+                                <li><a href="#">每日计划与达成</a></li>
+                                <li><a href="#">长期排程记录</a></li>
+                                <li><a href="#">生产进度查询</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-link">
+                            <a href="/StatisticalCenter/Index">
+                                <i class="fas fa-chart-area mr-1" aria-hidden="true" style=""></i>
+                                <span>统计中心</span>
+                                <i class="fas fa-angle-right" aria-hidden="true"></i>
+                            </a>
+                            <ul class="navChild">
+                                @*<li><a href="/StatisticalCenter/Index">每日产出统计</a></li>*@
+                                <li><a href="/StatisticalCenter/Index">成品产出统计</a></li>
+                                <li><a href="/StatisticalCenter/CenterProcess">中间工序产出统计</a></li>
+                                <li><a href="/StatisticalCenter/AuxiliaryResources">辅助资源统计</a></li>
+                                <li><a href="/StatisticalCenter/ScndUsuage">设备利用率</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+    
+    <script src="~/js/temp.js"></script>
+    <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="~/js/bootstrap-table-resizable.min.js"></script>
+    <script src="~/js/colResizable-1.6.min.js"></script>
+</body>
+</html>

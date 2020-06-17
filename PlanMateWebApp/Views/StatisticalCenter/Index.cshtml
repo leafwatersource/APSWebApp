@@ -1,0 +1,77 @@
+﻿
+@{
+    ViewData["Title"] = "每日产出统计";
+    Layout = "~/Views/Shared/StatisticalCenter_Layout_Two.cshtml";
+}
+<script>
+       $(".active").removeClass("active");
+            $(".nav-link").eq(5).addClass("active");
+            $(".Mynav").find("li.nav-link").eq(5).find("a").find(".fa-angle-right").removeClass("fa-angle-right").addClass("fa-angle-down");
+      $(".Mynav").find("li.nav-link").eq(5).find(".navChild").find("li").find("a").eq(0).addClass("innerActive");
+     $.post("/StatisticalCenter/GetProductOutput", { isfinal: 1, opname: ""}).done(function (response) {
+                if (response!="") {
+                    response = JSON.parse(response);
+                    for (var i = 0; i < response.length; i++) {
+                        //格式化日期,把后面的零清除掉
+                        response[i]["产出日期"] = $.getDate(new Date(response[i]["产出日期"]))
+                    }
+                    //初始化表格
+                    $("#reportTable").Totable(response, true);
+                    if ($(".filterGroup").children().length == 0) {
+                        $(".filterGroup").show();
+                        $(".filterGroup").FilterGroup(response);
+                    }
+                } else {
+                    $("#reportTable").Totable(response);
+                    if ($(".filterGroup").children().length == 0) {
+                        $(".filterGroup").show();
+                        $(".filterGroup").FilterGroup(response);
+                    }
+                }
+            })
+</script>
+@*<link href="~/Css/StatisticalCenter.css" rel="stylesheet" />
+<div class="content">
+    <div class="row alertBox">
+        <div class="alert alert-secondary alertCon" role="alert">
+
+            <div class="text-right">当前计划发布日期：@ViewBag.ReleaseTime，最后计划发布人： @ViewBag.Owner，计划发布名称：@ViewBag.WorkPlanName</div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <span><i class="fa fa-laptop" aria-hidden="true"></i> </span>
+            <span>工序分组</span>
+            <span style="float:right" id="allop"><a href="#">所有工序</a></span>
+            <span style="float:right;margin-right:.5em;" id="midop"><a href="#">中间工序</a></span>
+            <span style="float:right;margin-right:.5em;" id="lastop"><a href="#">最后工序</a></span>
+        </div>
+        <div class="card-body">
+        </div>
+    </div>
+    <div class="row alertBox InfoBox">
+        <div class="col col-8 orderInfo">
+            <i class="fa fa-table mr-1" aria-hidden="true"></i>每日产出统计详情
+        </div>
+        <div class="col col-4 orderBtn">*@
+            @*导出数据按钮*@
+            @*<a id="exportExcel" onclick="exportExcel_Click"></a>
+        </div>
+    </div>
+    <div class="filterGroup"> </div>
+    <table id="reportTable" class="table table-striped small"
+           data-toolbar="#toolbar"></table>
+</div>*@
+
+@*<script src="~/js/StatisticalCenter.js"></script>
+<script>
+    $(".Mynav").find("li.nav-link").eq(5).find(".navChild").find("li").find("a").eq(0).addClass("innerActive");
+</script>*@
+
+
+
+
+
+
+
+

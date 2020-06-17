@@ -1,0 +1,27 @@
+﻿
+@{
+    ViewData["Title"] = "物料需求";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+    <div class="content">
+        <div class="row alertBox">
+            <div class="alert alert-secondary alertCon" role="alert">
+                <div class="text-right">当前计划发布日期：@ViewBag.ReleaseTime，最后计划发布人：@ViewBag.Owner，计划发布名称：@ViewBag.WorkPlanName</div>
+            </div>
+        </div>
+        <div class="row alertBox InfoBox">
+            <div class="col col-8 orderInfo">
+                <i class="fa fa-table mr-1" aria-hidden="true"></i>物料需求详情
+            </div>
+            <div class="col col-4 orderBtn">
+                @*导出数据按钮*@
+                <a href="#" id="exportExcel"></a>
+            </div>
+        </div>
+        <div class="filterGroup">
+
+        </div>
+        <table id="reportTable" class="table table-striped small"
+               data-toolbar="#toolbar"></table>
+    </div>
+<script src="~/js/Materials.js"></script>

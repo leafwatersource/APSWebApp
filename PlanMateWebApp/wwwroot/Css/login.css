@@ -1,0 +1,105 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    background: -webkit-linear-gradient(to right, #0052D4, #65C7F7, #9CECFB);
+    background: linear-gradient(to right, #0052D4, #65C7F7, #9CECFB);
+}
+
+#userName {
+    line-height: 20px;
+}
+
+#userPass {
+    line-height: 20px;
+}
+
+.wrapper {
+    height: 100%;
+    width: 100%;
+    background: -webkit-linear-gradient(to right, #0052D4, #65C7F7, #9CECFB);
+    background: linear-gradient(to right, #0052D4, #65C7F7, #9CECFB);
+    font-weight: 100;
+}
+
+.cont {
+    width: 60%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    border-radius: 20px;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0.5rem 1rem 0 rgba(0, 0, 0, 0.5);
+}
+
+.Logo {
+    position: relative;
+    height: 284px;
+    background: url('../Image/timg.jpg') no-repeat 0px 0px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 20px 0 0 20px;
+}
+
+    .Logo img {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 3em;
+    }
+
+    .Logo h4 {
+        font-size: 1rem;
+        position: absolute;
+        bottom: 4em;
+        left: 50%;
+        transform: translateX(-50%)
+    }
+
+.form-group .form-control {
+    line-height: 0em;
+}
+
+@media screen and (max-width: 767px) {
+    .Logo {
+        display: none;
+    }
+
+        .Logo + div {
+            width: 100%;
+        }
+
+    .cont {
+        width: 80%;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-45%, -50%);
+    }
+}
+
+.forget {
+    margin-left: 100px;
+}
+
+.title {
+    color: #fff;
+    word-break: keep-all;
+    white-space: nowrap;
+}
+
+#loginTitle {
+    margin-top: 1em;
+    font-size: 1.5em;
+    font-weight:400;
+}
+
+.loginbtn {
+    line-height: 1.5em;
+    border-radius: .8em;
+}

@@ -1,0 +1,129 @@
+﻿
+@{
+    ViewData["Title"] = "设备利用率";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="~/Css/StatisticalCenter.css" rel="stylesheet" />
+<style>
+    .Res{
+        text-align:center;padding:8px 0;height:50px;border:1px solid  black;line-height:25px;
+        overflow:hidden;
+        white-space:nowrap;
+    }
+    .timeCl{
+        border-right:1px solid black;height:100%;border-top:1px solid black;
+    }
+</style>
+<div class="content">
+    <div class="row alertBox">
+        <div class="alert alert-secondary alertCon" role="alert">
+
+            <div class="text-right">当前计划发布日期：@ViewBag.ReleaseTime，最后计划发布人： @ViewBag.Owner，计划发布名称：@ViewBag.WorkPlanName</div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header" id="myHead">
+            <span><i class="fa fa-laptop" aria-hidden="true"></i> </span>
+            <span>设备组</span>
+        </div>
+        <div class="card-body">
+        </div>
+    </div>
+    <div class="row alertBox InfoBox">
+        <div class="col col-8 orderInfo">
+            <i class="fa fa-table mr-1" aria-hidden="true"></i>设备利用率详情
+        </div>
+        <div class="col col-4 orderBtn">
+            @*导出数据按钮*@
+            <a id="exportExcel" onclick="exportExcel_Click"></a>
+        </div>
+    </div>
+    <div class="filterGroup"> </div>
+    <div class="canbox" style="position:relative;width:100%;overflow:scroll;height:600px;">
+        <ul id="ResGroup" style="background-color:#ccc;width:200px;">
+            <li class="fa fa-laptop" style="width:120px;height:20px;padding:20px;">设备组</li>
+        </ul>
+        <ul style="border:1px solid black;position:absolute;top:0;left:200px;background-color:#ffeb3b;list-style:none;">
+            <li class="fa fa-table" style="padding:3px 0;text-align:center;width:100%;">设备利用率详情</li>
+            <li id="time">
+                @*<span class="timeCl">12/27</span>
+                <span style="border-right:1px solid black;height:100%;border-top:1px solid black;">12/28</span>*@
+            </li>
+            <li>
+                <canvas style="border-top:1px solid black;" width=2000 id="can"></canvas>
+            </li>
+        </ul>
+    </div>
+    @*<table id="reportTable" class="table table-striped small"
+                   data-toolbar="#toolbar"
+                   data-search="true"
+                   data-show-refresh="true"></table>
+        </div>
+        <script src="~/js/ScndUsuage.js"></script>
+        <script>
+            $(".Mynav").find("li.nav-link").eq(5).find(".navChild").find("li").find("a").eq(2).addClass("innerActive");
+        </script>*@
+    <script>
+        var dpr = (scale = window.devicePixelRatio || 1);
+        var canvas = document.getElementById("can");
+        $.post("/StatisticalCenter/GetuseDate").done(function (time) {
+            var timetemp = "";
+            for (var i = 0; i < time.length; i++) {
+                timetemp += "<span class='timeCl'>" + formatTime(time[i]["useDate"]) + "</span>";
+            }
+            $("#time").html(timetemp);
+            canvas.width = parseInt($("#time").width()) * dpr;
+            canvas.style.width = parseInt($("#time").width())+ "px"
+        })
+        $.post("/StatisticalCenter/GetAllResUsuage").done(function (data) {
+            data.forEach(function (ele, index) {
+                $("#ResGroup").append("<li class='Res'>" + ele.resname + "</li>")
+            });
+            draw($("#ResGroup").height(), data)
+        });
+        function formatTime(value) {
+            var date = new Date(value);
+            var month = (date.getMonth() + 1)< 10 ? "0" + (date.getMonth() + 1): date.getMonth() + 1;
+            var day = date.getDate() < 10 ? "0" + date.getDate():date.getDate();
+            return month + "/" + day;
+        }
+        function draw(boxHeight, data) {
+            var canvas = document.getElementById("can");
+            var disX = 18;
+            var disY = 45;
+            temp = 0;
+            var cxt = canvas.getContext("2d");
+            $(canvas).height(parseInt(boxHeight) - 40);
+            canvas.height = (parseInt(boxHeight) - 40) * dpr;
+            canvas.style.height = (parseInt(boxHeight) - 40) + "px";
+            for (var j = 0; j < data.length; j++) {
+                for (var i = 0; i < data[j]["rescontent"].length; i++) {
+                    cxt.fillStyle = "#4caf50";
+                    cxt.beginPath();
+                    cxt.strokeStyle = 'green';
+                    cxt.lineWidth = 15;
+                    cxt.lineCap = "butt";
+                    cxt.moveTo(disX, disY);
+                    if (parseInt(data[j]["rescontent"][i]["稼动率"]) >= 90) {
+                        console.log("here")
+                        cxt.lineTo(disX, disY - (parseInt(data[j]["rescontent"][i]["稼动率"]) * 0.01) * disY + temp);
+                    } else {
+                        cxt.lineTo(disX, disY - (parseInt(data[j]["rescontent"][i]["稼动率"]) * 0.01) * disY);
+                    }
+                    cxt.stroke();
+                    cxt.font = "14px bold 黑体";
+                    cxt.fillStyle = "#000";
+                    cxt.textAlign = "center";
+                    cxt.textBaseline = "middle";
+                    cxt.fillText(parseInt(data[j]["rescontent"][i]["稼动率"]) + "%", disX, disY / 2);
+                    disX += 45;
+                }
+                disY += 110;
+                disX = 20;
+                temp += 45;
+                //y轴坐标很难算 by Mr.YE
+            }
+        }
+
+    </script>
+   </div>

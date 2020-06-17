@@ -1,0 +1,32 @@
+﻿
+@{
+    ViewData["Title"] = "辅助资源统计";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="~/Css/StatisticalCenter.css" rel="stylesheet" />
+<div class="content">
+    <div class="row alertBox">
+        <div class="alert alert-secondary alertCon" role="alert">
+
+            <div class="text-right">当前计划发布日期：@ViewBag.ReleaseTime，最后计划发布人： @ViewBag.Owner，计划发布名称：@ViewBag.WorkPlanName</div>
+        </div>
+    </div>
+    <div class="row alertBox InfoBox">
+        <div class="col col-8 orderInfo">
+            <i class="fa fa-table mr-1" aria-hidden="true"></i>辅助资源统计详情
+        </div>
+        <div class="col col-4 orderBtn">
+            @*导出数据按钮*@
+            <a id="exportExcel" onclick="exportExcel_Click"></a>
+        </div>
+    </div>
+    <div class="filterGroup"> </div>
+    <table id="reportTable" class="table table-striped small"
+           data-toolbar="#toolbar"
+           data-search="true"
+           data-show-refresh="true"></table>
+</div>
+<script src="~/js/AuxiliaryResources.js"></script>
+<script>
+    $(".Mynav").find("li.nav-link").eq(5).find(".navChild").find("li").find("a").eq(1).addClass("innerActive");
+</script>

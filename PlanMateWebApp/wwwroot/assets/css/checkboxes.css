@@ -1,0 +1,103 @@
+body {
+  font-family: 'Lora', serif;
+  font-size: 16px;
+  color: #6f6767;
+}
+/*更多精品模板请访问：http://www.bootstrapmb.com*/
+a {
+  color: #6f6767;
+}
+a:hover {
+  color: #17223f;
+  text-decoration: none;
+}
+a:focus {
+  outline: 0;
+}
+
+.section {
+  padding: 100px 0;
+}
+
+.cutsom-checkbox-row {
+  position: relative;
+  margin-bottom: 10px;
+}
+.cutsom-checkbox-row input[type="checkbox"] {
+  margin: 0;
+  opacity: 0;
+}
+.cutsom-checkbox-row input[type="checkbox"] + label {
+  padding-left: 17px;
+}
+.cutsom-checkbox-row input[type="checkbox"] + label::before {
+  border-color: #dddddd;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  content: "";
+  cursor: pointer;
+  display: inline-block;
+  height: 25px;
+  left: 0;
+  position: absolute;
+  transition: 0.3s linear all;
+  width: 25px;
+}
+.cutsom-checkbox-row input[type="checkbox"] + label::after {
+  content: "";
+  transform: scale(0);
+  transition: 0.3s linear all;
+}
+.cutsom-checkbox-row input[type="checkbox"] + label:hover::before {
+  background-color: #ede0e0;
+  transition: 0.3s linear all;
+}
+.cutsom-checkbox-row input[type="checkbox"]:checked + label::before {
+  border-color: #3bb6b6;
+  border-style: dotted;
+  transition: 0.3s linear all;
+}
+.cutsom-checkbox-row input[type="checkbox"]:checked + label::after {
+  color: #3bb6b6;
+  content: "\f00c";
+  cursor: pointer;
+  font-family: 'FontAwesome';
+  left: 4px;
+  position: absolute;
+  top: 0px;
+  transform: scale(1);
+  transition: 0.3s linear all;
+}
+
+.custom-checkbox-style-row-2 input[type="checkbox"] + label::before {
+  border-color: #3bb6b6;
+  background-color: #ffffff;
+  border-radius: 0;
+}
+.custom-checkbox-style-row-2 input[type="checkbox"]:checked + label::before {
+  background-color: #fbebeb;
+  border-style: solid;
+  border-color: #fbebeb;
+}
+
+.custom-checkbox-style-row-3 input[type="checkbox"] + label::before {
+  border-color: #3bb6b6;
+  background-color: #3bb6b6;
+  border-radius: 0;
+  transform: scale(1);
+}
+.custom-checkbox-style-row-3 input[type="checkbox"] + label::after {
+  transform: scale(2);
+  opacity: 0;
+}
+.custom-checkbox-style-row-3 input[type="checkbox"]:checked + label::before {
+  background-color: #fbebeb;
+  border-style: solid;
+  transform: scale(1.2);
+  border-color: #fbebeb;
+}
+.custom-checkbox-style-row-3 input[type="checkbox"]:checked + label:after {
+  transform: scale(1);
+  opacity: 1;
+}

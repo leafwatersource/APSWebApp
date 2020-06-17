@@ -1,0 +1,12 @@
+﻿
+@{
+    ViewData["Title"] = "登录记录";
+    Layout = "~/Views/Shared/Record.cshtml";
+}
+
+<table id="table"></table>
+<script>
+    $.get("/Administrator/GetLog").done(function (response) {
+        $("#table").Totable(response);
+    });
+</script>

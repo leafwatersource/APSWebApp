@@ -1,0 +1,41 @@
+﻿.content .card .card-body .row a {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #32a4f9;
+}
+        .content .card .card-body .row a:hover, .content .card .card-body .row a.childnav-childactive {
+            color: #000;
+            text-decoration:none;
+        }
+        .content .table-responsive {
+            margin-top: 2px;
+            background-color: #fff;
+            padding: 8px;
+            border-radius: calc(0.25rem - 1px) calc(0.25rem - 1px) 0 0;
+            min-height: 200px;
+        }
+
+
+#allEquipment a {
+    color:green;
+}
+    #allEquipment a:hover {
+        text-decoration:none;
+    }
+  
+.content .cardInfo {
+    margin: 1em 0 0 0;
+}
+@media screen and (min-width: 768px) {
+    .Mynav ul li:nth-of-type(3) .navChild {
+        display: block;
+    }
+}
+@media screen and (max-width: 767px) {
+    .Mynav ul li:nth-of-type(3) .navChild {
+        display: none;
+    }
+    .Mynav ul li:hover .navChild {
+        display:block;
+    }
+}
