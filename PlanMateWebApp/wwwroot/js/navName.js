@@ -1,7 +1,8 @@
 ﻿(function () {
-    $.Loading();
+    //$.Loading();
     let NavName = {
         init: function () {
+            $.Loading();
             this.ajaxGet = null;//默认ajax为空
             this.defaultLeftnav();
         },
@@ -69,32 +70,63 @@
             });
         },
         defaultTable: function (plan, curIndex, ViewName) {
+            console.log(plan, curIndex, ViewName);
             //渲染表格
             if (curIndex == "bindClick" || curIndex == "fristIndex") {
                 $('.content').find('.card').find('.card-body').find('.show').find('a').eq(0).css({ color: '#000' });
             }
             if (plan != "") {
-                this.ajaxGet = $.get("/DataCenter/GetWorkPlanBars", { plan: plan, ViewName: ViewName }).done(function (response) {
-                    console.log(plan, ViewName)
-                    console.log(response)
-                    if (response != "") {
-                        response = JSON.parse(response);
-                        for (let i = 0; i < response.length; i++) {
-                            var date = new Date(response[i]["需求日期"]);
-                            //date.format("YYYY年MM月dd日");
-                            response[i]["需求日期"] = $.getDate(date);
-                            $('#reportTable').Totable(response, true);
-                            if ($(".filterGroup").children().length == 0) {
-                                $(".filterGroup").show();
-                                $(".filterGroup").FilterGroup(response);
-                            }
-                        }
-                    } else {
-                        $('#reportTable').Totable({}, true);
-
-                    }
-                    $.RemoveLoading("loading"); 
+                var columns = [];
+                $.get('/DataCenter/TableFiled', { "tableName": "WorkPlan" }).done(function (fileds) {
+                    fileds.forEach(function (item, index) {
+                        var object = {};
+                        object.field = item;
+                        object.title = item;
+                        object.width = 200;
+                        object.align = 'center';
+                        object.sortable = true;
+                        columns.push(object)
+                    });
+                    renderTable(columns)
                 });
+                function renderTable(column) {
+                    $('#table-request').SetTable('/DataCenter/WorkPlanBar', { "plan": plan }, column,text);
+                    function text(data) {
+                        data.forEach(function (item) {
+                            item['需求日期'] = $.getDate(new Date(item['需求日期']));
+                            item['计划开始'] = $.getDateTime(new Date(item['计划开始']));
+                            item['计划结束'] = $.getDateTime(new Date(item['计划结束']));
+                            item['切换开始'] = $.getDateTime(new Date(item['切换开始']));
+                        });
+                        return data;
+                    }
+                }
+
+
+
+
+
+                //this.ajaxGet = $.get("/DataCenter/GetWorkPlanBars", { plan: plan, ViewName: ViewName }).done(function (response) {
+                //    console.log(plan, ViewName)
+                //    console.log(response)
+                //    if (response != "") {
+                //        response = JSON.parse(response);
+                //        for (let i = 0; i < response.length; i++) {
+                //            var date = new Date(response[i]["需求日期"]);
+                //            //date.format("YYYY年MM月dd日");
+                //            response[i]["需求日期"] = $.getDate(date);
+                //            $('#reportTable').Totable(response, true);
+                //            if ($(".filterGroup").children().length == 0) {
+                //                $(".filterGroup").show();
+                //                $(".filterGroup").FilterGroup(response);
+                //            }
+                //        }
+                //    } else {
+                //        $('#reportTable').Totable({}, true);
+
+                //    }
+                //    $.RemoveLoading("loading"); 
+                //});
             } else {
                 //获取到没有数据的处理
                 $('#reportTable').Totable({}, true);
@@ -109,7 +141,7 @@
             let self = this;
             $('.Mynav').find('.nav-link').eq(2).find('.navChild').find('li').each(function (index, ele) {
                 $(ele).on('click', function () {
-                    $.Loading();
+                    //$.Loading();
                     if (self.ajaxGet != null)
                         self.ajaxGet.abort();
                     self.defaultRIghtNav($(this).find('a').text(), 'bindClick');
@@ -148,7 +180,7 @@
             $("#allEquipment").unbind();
             $('#allEquipment').find('a').on('click', function () {
                 let ViewName = $('.Mynav').find('li.nav-link').eq(2).find('.navChild').find('li').find('a.innerActive').text();
-                $.Loading();
+                //$.Loading();
                 self.defaultTable(null, curIndex, ViewName);
             });
         }

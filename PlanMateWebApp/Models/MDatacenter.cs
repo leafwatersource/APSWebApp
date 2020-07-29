@@ -185,7 +185,7 @@ namespace PlanMateWebApp.Models
 
     public class GetWorkplanBars
     {
-        public string GetPlanBars(string optionPlan, string ViewName)
+        public DataTable GetPlanBars(string optionPlan, string ViewName)
         {
             DataTable table = new DataTable();
           
@@ -239,7 +239,8 @@ namespace PlanMateWebApp.Models
             table.Columns[21].SetOrdinal(18);
             table.Columns[18].ColumnName = "切换时间";
             table.AcceptChanges();
-            return PMPublicFuncs.DatatableToJson(table);
+            //return PMPublicFuncs.DatatableToJson(table);
+            return table;
         }
     }
 

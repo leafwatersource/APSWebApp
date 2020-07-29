@@ -1,0 +1,114 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>TextPage</title>
+
+    <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/bootstrap-table/1.15.3/bootstrap-table.min.css" rel="stylesheet">
+    <style>
+        td, th {
+        padding:0 !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="toolbar"></div>
+    <table class="table text-nowrap table-striped" id="table-request"
+           data-pagination="true"
+           data-click-to-select="true"
+           data-single-select="true"
+           data-page-size="20">
+    </table>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <script src="~/assets/js/popper.min.js"></script>
+    @*<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>*@
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.2.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap-table/1.15.3/bootstrap-table.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap-table/1.15.3/locale/bootstrap-table-zh-CN.min.js"></script>
+    <script src="~/js/bootstrap-table-resizable.min.js"></script>
+    <script src="~/js/MyToolFn.js"></script>
+    <script>
+        var obj = {
+            init: function () {
+                this.getFiled()
+            },
+            getFiled: function () {
+                var columns = [];
+                var self = this;
+                $.get('/DataCenter/TableFiled', { "tableName": "WorkPlan" }).done(function (fileds) {
+                    fileds.forEach(function (item, index) {
+                        var object = {};
+                        object.field = item;
+                        object.title = item;
+                        object.width = 200;
+                        object.align = 'center';
+                        object.sortable = true;
+                        columns.push(object)
+                    });
+                    self.renderTable(columns)
+                });
+            },
+            renderTable: function (column) {
+                $('#table-request').bootstrapTable({
+                    ajax: function (request) {                    //使用ajax请求
+                        $.ajax({
+                            type: "GET",
+                            url: '/DataCenter/WorkPlanBar',             //请求后台的URL（*）
+                            contentType: 'application/json;charset=utf-8',
+                            dataType: 'json',
+                            data: {
+                                "plan": "海天数控车床19:1"
+                            },
+                            success: function (res) {
+                                res.data.rows = JSON.parse(res.data.rows);
+                                res.data.rows.forEach(function (item) {
+                                    item['需求日期'] = $.getDate(new Date(item['需求日期']));
+                                    item['计划开始'] = $.getDateTime(new Date(item['计划开始']));
+                                    item['计划结束'] = $.getDateTime(new Date(item['计划结束']));
+                                    item['切换开始'] = $.getDateTime(new Date(item['切换开始']));
+                                })
+                                //$(".filterGroup").show();
+                                //$(".filterGroup").FilterGroup(res.data.rows);
+                                request.success({
+                                    row: res.data,
+                                });
+                                $('#table-request').bootstrapTable('load', res.data.rows);
+                            },
+                            error: function (error) {
+                                console.log(error);
+                            }
+                        })
+                    },
+                    toolbar: '#toolbar',                //工具按钮用哪个容器
+                    striped: true,                      //是否显示行间隔色
+                    cache: true,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                    pagination: true,                   //是否显示分页（*）
+                    search: true,
+                    strictSearch: true,
+                    pageList: [20, 40, 60, 100],        //可供选择的每页的行数（*）
+                    clickToSelect: true,
+                    height: 500,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                    columns: column                  //列设置
+                });
+            }
+        };
+
+
+        obj.init();
+
+
+
+
+
+
+
+    </script>
+</body>
+</html>

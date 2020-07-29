@@ -1,57 +1,44 @@
 ﻿(function ($) {
     let pmuid = null;
     $.fn.extend({
-        Totable: function (data, flag) {
-            //转化成table的数据出入的是一个json数据
-            //第二个参数为true时是已经转换好了的json数据不用再做转换
-            let self = this;
-            if (data !== "" && !flag) { data = JSON.parse(data); }
-            else if (data == "") {
-                data = [{ "没有数据": "no data" }];
-            } else if (flag == undefined || flag == false) {
-
-            }
-            let arr = [];
-            for (k in data[0]) {
-                arr.push({ field: k, title: k, align: "center", valign: "middle", sortable: "true" })
-            }
-            let Maxlength = data.length;
+        SetTable: function (url,data,column,func) {
             $(this).bootstrapTable('destroy').bootstrapTable({
-                method: 'get',
-                cache: false,
-                height: 646,
-                striped: true,
-                pagination: true,
-                //showRefresh: true,
-                pageSize: 20,
-                pageNumber: 1,
-                pageList: [10, 25, 50, 100, Maxlength],
-                search: false,
-                showColumns: true,
-                columns: arr,
-                data: data,
-                formatNoMatches: function () {
-                    return '没有数据';
-                }
-            });
-            //表格左右拖动
-            //$(this).colResizable({
-            //    liveDrag: true,//拖动列时更新表布局
-            //    postbackSafe: true,//刷新后保留之前的拖拽宽度
-            //    headerOnly: true,
-            //    gripInnerHtml: "<div class='grip'></div>",
-            //    draggingClass: "dragging",
-            //    resizeMode: 'overflow',//允许溢出父容器
-            //    //resizeMode: 'fit',
-            //    //拖动事件
-            //    onDrag: function () {
-            //        $(self).bootstrapTable("resetView");
-            //    }
-            //});
-            //$(this).css({ overflow: 'scroll' });
-            $(window).resize(function () {
-                $(self).bootstrapTable('resetView');
-            });
+                ajax: function (request) {                    //使用ajax请求
+                    $.ajax({
+                        type: "GET",
+                        url: url,             //请求后台的URL（*）
+                        contentType: 'application/json;charset=utf-8',
+                        dataType: 'json',
+                        data: data || request.data,
+                        success: function (res) {
+                            res.data.rows = JSON.parse(res.data.rows);
+                            res.data.rows = func(res.data.rows);
+                            request.success({
+                                row: res.data,
+                            });
+                            $('#table-request').bootstrapTable('load', res.data.rows);
+                            $.RemoveLoading('loading');
+                        },
+                        error: function (error) {
+                            console.log(error);
+                        }
+                    })
+                },
+                toolbar: '#toolbar',                //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: true,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                pagination: true,                   //是否显示分页（*）
+                search: true,
+                strictSearch: true,
+                pageList: [20, 40, 60, 100],        //可供选择的每页的行数（*）
+                clickToSelect: true,
+                height: 500,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                columns: column,                 //列设置
+                exportDataType: 'all',//'basic':当前页的数据, 'all':全部的数据, 'selected':选中的数据
+                showExport: true,  //是否显示导出按钮
+                buttonsAlign: "right",  //按钮位置
+                exportTypes: ['excel'], 
+            })
         },
         SetLoading: function (options) {
             var $this = $(this);
@@ -284,6 +271,16 @@
             var dateTime = year + "/" + month + "/" + day;
             return dateTime;
         },
+        getDateTime(dateTime) {
+            var year = dateTime.getFullYear();
+            var month = (dateTime.getMonth() + 1) < 10 ? "0" + (dateTime.getMonth() + 1) : (dateTime.getMonth() + 1);//月份显示0~11，需要加1
+            var day = dateTime.getDate() < 10 ? "0" + dateTime.getDate() : dateTime.getDate();
+            var hour = dateTime.getHours() < 10 ? "0" + dateTime.getHours() : dateTime.getHours();
+            var min = dateTime.getMinutes() < 10 ? "0" + dateTime.getMinutes() : dateTime.getMinutes();
+            var sec = dateTime.getSeconds() < 10 ? "0" + dateTime.getSeconds() : dateTime.getSeconds();
+            var time = year + "/" + month + "/" + day + " " + hour + ":" + min + ":" + sec;
+            return time;
+        },
         DateFormat: function (data) {
             //更改日期的格式
             let timeArr = [];
@@ -448,26 +445,4 @@
             return obj[cookieName] ? obj[cookieName] : "没有存入这个cookie名";
         }
     })
-    //$("#btnlogout").click(function () {
-    //    //退出按钮点击,清除cookie
-    //    console.log(21212121)
-    //    var cookies = document.cookie.split(";");
-    //    $.get("/Public/DeleteUserInfo");//清空userModels里面的成员变量
-    //    for (var i = 0; i < cookies.length; i++) {
-    //        var cookie = cookies[i];
-    //        var eqPos = cookie.indexOf("=");
-    //        var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-    //        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-    //    }
-    //    if (cookies.length > 0) {
-    //        for (var i = 0; i < cookies.length; i++) {
-    //            var cookie = cookies[i];
-    //            var eqPos = cookie.indexOf("=");
-    //            var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-    //            var domain = location.host.substr(location.host.indexOf('.'));
-    //            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=" + domain;
-    //        }
-    //    }       
-    //    window.location.href = "";
-    //});
 })(jQuery)

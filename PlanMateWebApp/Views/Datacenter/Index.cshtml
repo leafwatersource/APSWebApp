@@ -102,7 +102,15 @@
     <div class="filterGroup">
 
     </div>
-    <table id="reportTable" class="table table-striped small"></table>
+    @*<table id="reportTable" class="table table-striped small"></table>*@
+    @*<div id="toolbar"></div>*@
+    <table class="table text-nowrap table-striped" id="table-request"
+           data-pagination="true"
+           data-click-to-select="true"
+           data-single-select="true"
+            showExport="true"
+           data-page-size="20">
+    </table>
     <div class="container-fluid">
         <div class="row">
             @*<div id="echart" style="width: 100%;height:800px;"></div>*@
@@ -110,7 +118,12 @@
         </div>
     </div>
 </div>
-<script src="~/js/orderConfirm.js"></script>
+
+@*<script src="${basePath }/js/bootstrap-table-export.js"></script>
+<script src="${basePath }/js/tableExport.min.js"></script>
+<script src="${basePath }/js/xlsx.core.min.js"></script>
+<script src="${basePath }/js/FileSaver.min.js"></script>*@
+    <script src="~/js/orderConfirm.js"></script>
 <script src="~/js/jquery.stacked-gantt.min.js"></script>
 <script src="~/js/MyGanttData.js"></script>
 

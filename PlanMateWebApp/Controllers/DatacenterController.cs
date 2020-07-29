@@ -9,6 +9,9 @@ using PMPublicFunctions.PMPublicFunc;
 using PMStaticModels.PlanModels;
 using PMStaticModels.UserModels;
 using PMSettings;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+
 namespace PlanMateWebApp.Controllers
 {
     public class DatacenterController : Controller
@@ -42,6 +45,10 @@ namespace PlanMateWebApp.Controllers
                 order.Pieorder();
                 return View(data);
             }
+        }
+        public IActionResult TextPage()
+        {
+            return View();
         }
         public IActionResult Implementation()
         {           
@@ -111,10 +118,35 @@ namespace PlanMateWebApp.Controllers
             {
                 return View();
             }
-        }            
-      
-        public string DTworkOrder()
-        {
+        }
+        /// <summary>
+        /// WorkOrderFild:返回数据中心工单页面的所展示的列
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult TableFiled(string tableName) {
+            string jsonfile ="filed.json";//JSON文件路径
+            using (System.IO.StreamReader file = System.IO.File.OpenText(jsonfile))
+            {
+                using (JsonTextReader reader = new JsonTextReader(file))
+                {
+                    JObject filed = (JObject)JToken.ReadFrom(reader);
+                    if (tableName == "WorkOrder")
+                    {
+                        return Ok(filed["ShowWorkOrderFiled"]);
+
+                    }
+                    else if(tableName == "WorkPlan")
+                    {
+                        return Ok(filed["ShowWorkPlanFiled"]);
+                    }
+                    else
+                    {
+                        return Ok(111);
+                    }
+                }
+            }
+        }
+        public ActionResult DTworkOrder() {
             DataTable dt = Workplaninfo.GetWorkOrder("workID,productID,allQuantity,desp,planStartTime,planFinishTime,firstDemandDay,delayDays", "isScheduleWorkID = '1'", string.Empty);
             DataTable productId = Workplaninfo.GetWorkOrder("productID", "isScheduleWorkID = '1'", string.Empty);
             dt.Columns["productID"].ColumnName = "产品名称";
@@ -128,7 +160,7 @@ namespace PlanMateWebApp.Controllers
             dt.Columns["delayDays"].ColumnName = "延迟天数";
             for (int i = 1; i <= Convert.ToInt32(PMAppSettings.ItemAttrCount); i++)
             {
-                if (i==Convert.ToInt32(PMAppSettings.ItemAttrCount))
+                if (i == Convert.ToInt32(PMAppSettings.ItemAttrCount))
                 {
                     AttrTable.Columns["itemWeight"].ColumnName = PMAppSettings.ItemGroup.Rows[0]["itemWeight"].ToString();
                     dt.Columns.Add(PMAppSettings.ItemGroup.Rows[0]["ItemWeight"].ToString());
@@ -147,7 +179,7 @@ namespace PlanMateWebApp.Controllers
                     {
                         foreach (DataColumn col in AttrTable.Columns)
                         {
-                            if (col.ColumnName!= "itemName")
+                            if (col.ColumnName != "itemName")
                             {
                                 dt.Rows[i][col.ColumnName] = AttrTable.Rows[v][col.ColumnName].ToString().Replace(" - ", " ").Replace("\"", "'");
                             }
@@ -155,8 +187,16 @@ namespace PlanMateWebApp.Controllers
                     }
                 }
             }
-
-            return PMPublicFuncs.DatatableToJson(dt);
+            string JsonString = string.Empty;
+            JsonString = JsonConvert.SerializeObject(dt);
+            JObject tableData = new JObject();
+            tableData.Add("total", dt.Rows.Count);
+            tableData.Add("rows", JsonString);
+            JObject data = new JObject();
+            data.Add("code", "0");
+            data.Add("data", tableData);
+            data.Add("msg", "successful");
+            return Ok(data);
         }
         public string NavName()
         {
@@ -171,7 +211,25 @@ namespace PlanMateWebApp.Controllers
         public string GetWorkPlanBars(string plan, string ViewName)
         {
             GetWorkplanBars PlanInfo = new GetWorkplanBars();
-            return PlanInfo.GetPlanBars(plan, ViewName);
+            DataTable table = new DataTable();
+            table = PlanInfo.GetPlanBars(plan,ViewName);
+            return PMPublicFuncs.DatatableToJson(table);
+        }
+        public ActionResult WorkPlanBar(string plan, string ViewName) {
+            GetWorkplanBars PlanInfo = new GetWorkplanBars();
+            DataTable table = new DataTable();
+            table = PlanInfo.GetPlanBars(plan, ViewName);
+            string JsonString = string.Empty;
+            JsonString = JsonConvert.SerializeObject(table);
+            JObject tableData = new JObject();
+            tableData.Add("total", table.Rows.Count);
+            tableData.Add("rows", JsonString);
+            JObject data = new JObject();
+            data.Add("code", "0");
+            data.Add("data", tableData);
+            data.Add("msg", "successful");
+            return Ok(data);
+
         }
         public string StatisticalData()
         {
