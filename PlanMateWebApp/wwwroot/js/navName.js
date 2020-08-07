@@ -70,7 +70,6 @@
             });
         },
         defaultTable: function (plan, curIndex, ViewName) {
-            console.log(plan, curIndex, ViewName);
             //渲染表格
             if (curIndex == "bindClick" || curIndex == "fristIndex") {
                 $('.content').find('.card').find('.card-body').find('.show').find('a').eq(0).css({ color: '#000' });
@@ -90,8 +89,9 @@
                     renderTable(columns)
                 });
                 function renderTable(column) {
-                    $('#table-request').SetTable('/DataCenter/WorkPlanBar', { "plan": plan }, column,text);
-                    function text(data) {
+                    $('#table-request').SetTable('/DataCenter/WorkPlanBar', { "plan": plan }, column, func, "执行计划-" + plan);
+                    function func(data) {
+                        $(".filterGroup").FilterGroup(data, column, "执行计划-" + plan);
                         data.forEach(function (item) {
                             item['需求日期'] = $.getDate(new Date(item['需求日期']));
                             item['计划开始'] = $.getDateTime(new Date(item['计划开始']));
@@ -101,32 +101,6 @@
                         return data;
                     }
                 }
-
-
-
-
-
-                //this.ajaxGet = $.get("/DataCenter/GetWorkPlanBars", { plan: plan, ViewName: ViewName }).done(function (response) {
-                //    console.log(plan, ViewName)
-                //    console.log(response)
-                //    if (response != "") {
-                //        response = JSON.parse(response);
-                //        for (let i = 0; i < response.length; i++) {
-                //            var date = new Date(response[i]["需求日期"]);
-                //            //date.format("YYYY年MM月dd日");
-                //            response[i]["需求日期"] = $.getDate(date);
-                //            $('#reportTable').Totable(response, true);
-                //            if ($(".filterGroup").children().length == 0) {
-                //                $(".filterGroup").show();
-                //                $(".filterGroup").FilterGroup(response);
-                //            }
-                //        }
-                //    } else {
-                //        $('#reportTable').Totable({}, true);
-
-                //    }
-                //    $.RemoveLoading("loading"); 
-                //});
             } else {
                 //获取到没有数据的处理
                 $('#reportTable').Totable({}, true);

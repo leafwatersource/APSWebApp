@@ -110,7 +110,7 @@
             }
         };
         $(document).ready(function () {
-            console.log(jobdata)
+            //console.log(jobdata)
             // var $timeline = $('#timeline').stackedGantt(timeoptions);
             var jobschedules = $('#jobschedules').stackedGantt(joboptions);
         });

@@ -1,10 +1,10 @@
 ﻿
 .filterGroup {
-    transform: translateY(40%);
-    position: relative;
+    /*transform: translateY(127%);*/
+    position: absolute;
+    top:1%;
     z-index: 100;
     display:none;
-    width:90%;
 }
 .filterDiv {
     background-color: #fff;

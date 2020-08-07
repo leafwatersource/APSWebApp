@@ -28,15 +28,29 @@
             <a id="exportExcel" onclick="exportExcel_Click"></a>
         </div>
     </div>
-    <div class="filterGroup"> </div>
-    <table class="table text-nowrap table-striped" id="table-request"
-           data-pagination="true"
-           data-click-to-select="true"
-           data-single-select="true"
-           data-page-size="20">
-    </table>
-</div>
-<script src="~/js/navName.js"></script>
-<script src="~/js/Implementation.js"></script>
+    <div class="table_box">
+        <div class="filterGroup"> </div>
+        <div id="toolbar"></div>
+        <table class="table text-nowrap table-striped"
+               id="table-request"
+               data-toggle="table"
+               data-maintain-selected="true"
+               data-sort-name="Zeitpunkt"
+               data-sort-order="asc"
+               data-search="true"
+               data-show-pagination-switch="true"
+               data-pagination="true"
+               data-page-list="[10, 25, 50, 100, ALL]"
+               data-page-size="25"
+               data-show-footer="false"
+               data-side-pagination="client"
+               data-show-export="true"
+               data-export-types="['excel', 'pdf]"
+               data-click-to-select="true">
+        </table>
+    </div>
+    </div>
+    <script src="~/js/navName.js"></script>
+    <script src="~/js/Implementation.js"></script>
 
 

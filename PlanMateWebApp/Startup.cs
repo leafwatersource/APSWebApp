@@ -18,7 +18,7 @@ namespace PlanMateWebApp
             services.AddMvcCore().AddNewtonsoftJson(options => {
                 options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
             });
-           // RegisterMyServices(services);
+            // RegisterMyServices(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

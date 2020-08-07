@@ -16,6 +16,9 @@
         }
 
 
+.filterGroup {
+    top: 2%;
+}
 #allEquipment a {
     color:green;
 }

@@ -1,7 +1,31 @@
 ﻿(function ($) {
     let pmuid = null;
     $.fn.extend({
-        SetTable: function (url,data,column,func) {
+        Totable: function (target, tableData, column,excelName) {
+            $(this).bootstrapTable('destroy').bootstrapTable({
+                method: 'get',
+                cache: false,
+                data: target,
+                toolbar: '#toolbar',                //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: true,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                pagination: true,                   //是否显示分页（*）
+                search: true,
+                strictSearch: true,
+                clickToSelect: true,
+                height: 500,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                columns: column,                 //列设置
+            });
+            $(this).bootstrapTable("hideLoading");
+            $(this).bootstrapTable('refreshOptions', {
+                exportOptions: {
+                    fileName: excelName,
+                    pdfmake: { enabled: true }
+                }
+            });
+        },
+        SetTable: function (url, data, column, func, excelName) {
+            $(this).bootstrapTable("hideLoading");
             $(this).bootstrapTable('destroy').bootstrapTable({
                 ajax: function (request) {                    //使用ajax请求
                     $.ajax({
@@ -29,16 +53,34 @@
                 cache: true,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
                 pagination: true,                   //是否显示分页（*）
                 search: true,
-                strictSearch: true,
-                pageList: [20, 40, 60, 100],        //可供选择的每页的行数（*）
+                strictSearch: false,
                 clickToSelect: true,
+                showRefresh: true,
                 height: 500,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
                 columns: column,                 //列设置
-                exportDataType: 'all',//'basic':当前页的数据, 'all':全部的数据, 'selected':选中的数据
                 showExport: true,  //是否显示导出按钮
                 buttonsAlign: "right",  //按钮位置
-                exportTypes: ['excel'], 
-            })
+                type: 'excel',
+                exportTypes: ['excel', 'xlsx', 'txt'], //导出文件类型
+                Icons: 'glyphicon-export',
+                onPostBody: function () {
+                    //重点就在这里，获取渲染后的数据列td的宽度赋值给对应头部的th,这样就表头和列就对齐了
+                    var header = $(".fixed-table-header table thead tr th");
+                    var body = $(".fixed-table-header table tbody tr td");
+                    var footer = $(".fixed-table-header table tr td");
+                    body.each(function () {
+                        header.width((this).width());
+                        footer.width((this).width());
+                    });
+                }
+            });
+            $(this).bootstrapTable('refreshOptions', {
+                exportOptions: {
+                    fileName: excelName
+                }
+            });
+            
+            
         },
         SetLoading: function (options) {
             var $this = $(this);
@@ -46,7 +88,7 @@
             return this.each(function () {
                 var loadingPosition = '';
                 var defaultProp = {
-                    direction: 'column',												//方向，column纵向   row 横向
+                    direction: 'column',											//方向，column纵向   row 横向
                     animateIn: 'fadeInNoTransform',    								//进入类型
                     title: '请稍等...',      										//显示什么内容
                     name: 'loadingName', 											//loading的data-name的属性值  用于删除loading需要的参数
@@ -156,10 +198,12 @@
                 defaultProp._createLoading();
             });
         },
-        FilterGroup: function (response) {
+        FilterGroup: function (response, column, excelName) {
+            var tabeData = response;
+            $(this).show();
             //高级筛选部分
-            $(this).append('<input type="text" placeholder="模糊搜索" id="filterInput" />\
-                <input type="button" class="btn btn-info" id="Screening" value="高级筛选" />\
+            $(this).html('');
+            $(this).append('<input type="button" class="btn btn-info" id="Screening" value="高级筛选" />\
                 <div class="filterDiv">\
                     <p>*请选择筛选条件 <i class="fa fa-times" aria-hidden="true"></i></p>\
                     <div class="filterBody"> </div>\
@@ -191,20 +235,17 @@
             });
             //重置按钮的点击事件
             $("#reset").on("click", function () {
-                $(".filterDiv").find(".filterBody").find(".filterItem").each(function (index, ele) {
-                    $(ele).find("input").val("");
-                    $('#reportTable').Totable(response, true);
-                });
+                $('.filterItem').find('input').val('');
+                $('#table-request').Totable(response, true, column);
             });
             //搜索按钮的点击事件
             $("#senior").on("click", function () {
-                $("#filterInput").val("");//清空模糊搜索的框
                 let target = $(".filterBody").find(".filterItem");
                 //筛选条件
                 let resultArr= FilterFunc(target, response)
-                $('#reportTable').Totable(resultArr, true)
+                $('#table-request').Totable(resultArr, true, column, excelName)
             });
-            function FilterFunc(target,response) {
+            function FilterFunc(target, response) {
                 let filter = {};
                 for (let i = 0; i < target.length; i++) {
                     if ($(target).eq(i).find("input").val() != "") {
@@ -226,11 +267,13 @@
                     function (item) {
                         let flag = false;
                         for (key in tempFilter) {
-                            if (item[key].toString().indexOf(tempFilter[key].toString()) >= 0) {
-                                flag = true;
-                            } else {
-                                flag = false;
-                                break;
+                            if (item[key] != null) {
+                                if (item[key].toString().indexOf(tempFilter[key].toString()) >= 0) {
+                                    flag = true;
+                                } else {
+                                    flag = false;
+                                    break;
+                                }
                             }
                         }
                         if (flag) {
@@ -240,19 +283,6 @@
                 );
                 return resultArr;
             }
-            //模糊搜索的input框按键输入事件
-            $("#filterInput").on("input", function () {
-                let temp = $(this).val().trim();
-                let newArr = [];
-                for (var i = 0; i < response.length; i++) {
-                    for (var k in response[i]) {
-                        if (newArr.indexOf(response[i]) == -1 && response[i][k].indexOf(temp) != -1) {
-                            newArr.push(response[i]);
-                        }
-                    }
-                }
-                $('#reportTable').Totable(newArr, true)
-            });
         },
         GetCookie: function (cookieKey) {
             if (!document.cookie.GetCookie("empid") && !document.cookie.GetCookie('uuid')) {
@@ -331,7 +361,7 @@
                 $(".cpt-loading-mask[data-name=" + name + "]").remove();
             }
         },
-        Toechart: function (id, source, count) {
+        Toechart: function (id, source,) {
             //传入元素的id值
             //source的值是图表的y轴坐标
             //count的值是图标的x轴坐标

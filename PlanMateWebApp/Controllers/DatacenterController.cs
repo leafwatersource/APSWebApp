@@ -11,11 +11,17 @@ using PMStaticModels.UserModels;
 using PMSettings;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using static System.Net.Mime.MediaTypeNames;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
 
 namespace PlanMateWebApp.Controllers
 {
+   
+
     public class DatacenterController : Controller
     {
+       
         public IActionResult Index()
         {            
             if (PMUser.EmpID ==string.Empty)
@@ -187,11 +193,9 @@ namespace PlanMateWebApp.Controllers
                     }
                 }
             }
-            string JsonString = string.Empty;
-            JsonString = JsonConvert.SerializeObject(dt);
             JObject tableData = new JObject();
             tableData.Add("total", dt.Rows.Count);
-            tableData.Add("rows", JsonString);
+            tableData.Add("rows", JsonConvert.SerializeObject(dt));
             JObject data = new JObject();
             data.Add("code", "0");
             data.Add("data", tableData);

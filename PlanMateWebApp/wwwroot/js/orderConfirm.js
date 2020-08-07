@@ -1,8 +1,8 @@
 ; (function ($) {
     let orderConfirm = {
         init: function () {
-            let count = null;
-            let source = null;
+            //let count = null;
+            //let source = null;
             $.Loading();
             //$.get('/Datacenter/StatisticalData').done(function (response) {
             //获取echart的横轴的数据
@@ -22,48 +22,35 @@
             //    })
             //});
             this.render();
-
         },
         render: function () {
-            this.getColumns();   
-            
+            this.getColumns(); 
         },
         bindEvent: function () {
-            //筛选的input框
-            //let self = this;
-            //$("#filterInput").on("input", function () {
-            //    let temp = $(this).val();
-            //    let newArr = [];
-            //    for (var i = 0; i < self.data.length; i++) {
-            //        for (var k in self.data[i]) {
-            //            if (newArr.indexOf(self.data[i]) == -1 && self.data[i][k].indexOf(temp) != -1) {
-            //                newArr.push(self.data[i]);
-            //            }
-            //        }
-            //    }
-            //    $('#reportTable').Totable(newArr, true)
-            //})
+          
         },
         getColumns: function () {
             var columns = [];
             let self = this;
-            $.get('/DataCenter/TableFiled', { "tableName":"WorkOrder"}).done(function (fileds) {
+            $.get('/DataCenter/TableFiled', { "tableName": "WorkOrder" }).done(function (fileds) {
                 fileds.forEach(function (item, index) {
                     var object = {};
                     object.field = item;
                     object.title = item;
-                    object.width = 200;
                     object.align = 'center';
                     object.sortable = true;
-                    columns.push(object)
+                    columns.push(object);
                 });
-                self.renderTable(columns)
+                self.renderTable(columns);
             });
            
         },
         renderTable: function (column) {
-            $('#table-request').SetTable('/DataCenter/DTworkOrder', {}, column, formateData);
+            let self = this;
+            $('#table-request').SetTable('/DataCenter/DTworkOrder', {}, column, formateData,"订单列表");
             function formateData(data) {
+                console.log(data);
+                $(".filterGroup").FilterGroup(data, column, "订单列表");
                 data.forEach(function (item) {
                     item['需求日期'] = $.getDate(new Date(item['需求日期']));
                 });
