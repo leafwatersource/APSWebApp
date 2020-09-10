@@ -1,11 +1,33 @@
 ﻿
 .filterGroup {
-    /*transform: translateY(127%);*/
     position: absolute;
-    top:1%;
+    top: 9px;
     z-index: 100;
-    display:none;
+    display: none;
+    line-height: 30px;
 }
+    .filterGroup #Screening {
+        background-color: #007bff;
+        color:white;
+    }
+.filterBody #Screening:focus {
+    outline: 0;
+}
+    .ExportBtn {
+        position: absolute;
+        top: 9px;
+        right: 290px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        line-height: 30px;
+        padding: 6px 15px;
+        border-radius: 4px;
+        outline: none;
+    }
+        .ExportBtn:focus {
+            outline: 0;
+        }
 .filterDiv {
     background-color: #fff;
     position: absolute;

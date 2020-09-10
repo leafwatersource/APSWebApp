@@ -10,9 +10,6 @@ namespace PlanMateWebApp.Controllers
 {
     public class PublicController : Controller
     {
-        public void ExportData(string data) {
-            int a = data.Length;
-        }
         public void DeleteUserInfo()
         {
             PMPublicFunctions.PMPublicFunc.PMPublicFuncs.DeleteUser();

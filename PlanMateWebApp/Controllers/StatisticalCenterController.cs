@@ -19,11 +19,17 @@ namespace PlanMateWebApp.Controllers
         /// <returns>View</returns>
         public IActionResult Index()
         {
-            if (PMUser.EmpID == string.Empty)
+            string[] UserIDList = PMUser.UserMessage.Select(x => x.EmpID).ToArray();
+            bool UserID = UserIDList.Contains<string>(HttpContext.Request.Cookies["EmpID"]);
+            //if (PMUser.EmpID ==string.Empty)
+            //{
+            //    return RedirectToAction("Index", "Index");
+            //}
+            if (!UserID)
             {
                 return RedirectToAction("Index", "Index");
             }
-            else if (HttpContext.Request.Cookies["UserGuid"] != PMUser.GetuserGuid(PMUser.EmpID))
+            else if (HttpContext.Request.Cookies["UserGuid"] != PMUser.GetuserGuid(HttpContext.Request.Cookies["EmpID"]))
             {
                 return RedirectToAction("Index", "Index");
             }

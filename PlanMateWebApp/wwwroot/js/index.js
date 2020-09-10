@@ -80,7 +80,7 @@ function Login() {
             $("#LoginMsg").text(response[1]);
             }
         else if (response["loginState"] == "1") {
-               window.location.href = '/Selector/Index';
+               //window.location.href = '/Selector/Index';
             }
     })
 }
@@ -88,7 +88,10 @@ function Login() {
 
 function Logout() {
     $.post("/Index/Logout", { empID: $("#userName").val(), userPass: $("#userPass").val() }).done(function (response) {
+        console.log(response)
         if (response["loginState"] == "1") {
+            //document.cookie = "EmpID=" + response.empID;  
+            //document.cookie = "UserGuid=" + response.userGuid;
             window.location.href = 'Selector';
         }
         else {

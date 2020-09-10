@@ -13,7 +13,7 @@
                 search: true,
                 strictSearch: true,
                 clickToSelect: true,
-                height: 500,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                height:$(window).height() - $(this).offset().top - 12,//行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
                 columns: column,                 //列设置
             });
             $(this).bootstrapTable("hideLoading");
@@ -22,6 +22,10 @@
                     fileName: excelName,
                     pdfmake: { enabled: true }
                 }
+            });
+            let self = this;
+            $(window).resize(function () {
+                $(self).bootstrapTable('resetView');
             });
         },
         SetTable: function (url, data, column, func, excelName) {
@@ -51,17 +55,17 @@
                 toolbar: '#toolbar',                //工具按钮用哪个容器
                 striped: true,                      //是否显示行间隔色
                 cache: true,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
-                pagination: true,                   //是否显示分页（*）
+                pagination: true,                   //是否显示分页（*)
                 search: true,
                 strictSearch: false,
                 clickToSelect: true,
                 showRefresh: true,
-                height: 500,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                height: $(window).height() - $(this).offset().top - 12,                        //行高，如果没有设置height属性,表格自动根据记录条数觉得表格高度
                 columns: column,                 //列设置
-                showExport: true,  //是否显示导出按钮
+                //showExport: true,  //是否显示导出按钮
                 buttonsAlign: "right",  //按钮位置
-                type: 'excel',
-                exportTypes: ['excel', 'xlsx', 'txt'], //导出文件类型
+                //type: 'excel',
+                //exportTypes: ['excel', 'xlsx', 'txt'], //导出文件类型
                 Icons: 'glyphicon-export',
                 onPostBody: function () {
                     //重点就在这里，获取渲染后的数据列td的宽度赋值给对应头部的th,这样就表头和列就对齐了
@@ -79,8 +83,12 @@
                     fileName: excelName
                 }
             });
-            
-            
+            let self = this;
+            $(window).resize(function () {
+                $(self).bootstrapTable('resetView');
+            });
+            $('.fixed-table-border').css('display', 'none');
+            $('.fixed-height').css('paddingBottom', '0');
         },
         SetLoading: function (options) {
             var $this = $(this);
@@ -108,7 +116,6 @@
                     originHeight: 8,                  									//小圆点Height
                     originBg: '#fefefe',              								//小圆点背景色
                     smallLoading: false,                  								//显示小的loading
-
                     flexCenter: false, 													//是否用flex布局让loading-div垂直水平居中
                     flexDirection: 'row',													//row column  flex的方向   横向 和 纵向				
                     mustRelative: false, 													//$this是否规定relative
@@ -203,7 +210,7 @@
             $(this).show();
             //高级筛选部分
             $(this).html('');
-            $(this).append('<input type="button" class="btn btn-info" id="Screening" value="高级筛选" />\
+            $(this).append('<input type="button" class="btn" id="Screening" value="高级筛选" />\
                 <div class="filterDiv">\
                     <p>*请选择筛选条件 <i class="fa fa-times" aria-hidden="true"></i></p>\
                     <div class="filterBody"> </div>\

@@ -13,15 +13,16 @@ namespace PMStaticModels.StatisticalModels
         public static DataTable GetProductOutPut(int isfinal,string OpName)
         {
             SqlCommand cmd = PMCommand.SchCmd();
-            string itemAttrstr = "";
+            string itemAttrstr = "\'\'";
             for (int i = 0; i <Convert.ToInt32( PMSettings.PMAppSettings.ItemAttrCount); i++)
             {
-                if (itemAttrstr!="")
+                if (itemAttrstr != "\'\'")
                 {
                     itemAttrstr += ",itemattr" + (i + 1);
                 }
                 else
                 {
+                    itemAttrstr = "";
                     itemAttrstr += "itemattr" + (i + 1);
                 }
             }

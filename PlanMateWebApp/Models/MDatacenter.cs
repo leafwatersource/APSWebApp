@@ -8,12 +8,21 @@ using PMPublicFunctions.PMPublicFunc;
 using PMStaticModels.PlanModels;
 using Microsoft.AspNetCore.Mvc;
 using DataTable = System.Data.DataTable;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.IO;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.Hosting;
+using PMStaticModels.UserModels;
 
 namespace PlanMateWebApp.Models
 {
+    /// <summary>
+    /// 获取甘特图的数据
+    /// </summary>
     public class GantaData
     {
-        private string realOpName{get; set;}
+        private string realOpName { get; set; }
         public string RealOpName
         {
             get
@@ -57,7 +66,7 @@ namespace PlanMateWebApp.Models
 
         public void Datacenterorderdelay()
         {
-            DataTable table = Workplaninfo.GetWorkOrder("delayDays", "isScheduleWorkID = '1'", string.Empty);            
+            DataTable table = Workplaninfo.GetWorkOrder("delayDays", "isScheduleWorkID = '1'", string.Empty);
             foreach (DataRow item in table.Rows)
             {
                 if (item[0].ToString() == "")
@@ -88,16 +97,20 @@ namespace PlanMateWebApp.Models
             OnTimePercentage = Convert.ToInt32((Convert.ToDouble(OnTimeCount) / Convert.ToDouble(table.Rows.Count)) * 100);
             LatePercentage = Convert.ToInt32((Convert.ToDouble(LateCount) / Convert.ToDouble(table.Rows.Count)) * 100);
         }
+        /// <summary>
+        /// 获取导航栏的数据
+        /// </summary>
+        /// <returns></returns>
         public static string StrNavName()
-        { 
+        {
             List<string> groupList = new List<string>();
             SqlCommand cmd = PMCommand.SchCmd();
-            cmd.CommandText = "SELECT distinct viewname FROM View_PmViewGroup where SYSID ='" + PMStaticModels.UserModels.PMUser.UserSysID+ "' and vglobal = 'export'";
+            cmd.CommandText = "SELECT distinct viewname FROM View_PmViewGroup where SYSID ='" + PMStaticModels.UserModels.PMUser.UserSysID + "' and vglobal = 'export'";
             SqlDataReader rd = cmd.ExecuteReader();
             while (rd.Read())
             {
                 groupList.Add(rd[0].ToString());
-            }            
+            }
             rd.Close();
             if (groupList.Count == 0)
             {
@@ -108,7 +121,7 @@ namespace PlanMateWebApp.Models
                     groupList.Add(rd[0].ToString());
                 }
                 rd.Close();
-                if(groupList.Count == 0)
+                if (groupList.Count == 0)
                 {
                     return "没有为设备创建视图";
                 }
@@ -116,7 +129,7 @@ namespace PlanMateWebApp.Models
                 {
                     return PMPublicFuncs.ListToJson(groupList);
                 }
-            }  
+            }
             else
             {
                 return PMPublicFuncs.ListToJson(groupList);
@@ -150,13 +163,14 @@ namespace PlanMateWebApp.Models
             da.Fill(table);
             da.Dispose();
             cmd.Connection.Dispose();
-            for (int i = 0; i <  table.Rows.Count; i++)
+            for (int i = 0; i < table.Rows.Count; i++)
             {
-                GantaData gantaData = new GantaData();
-                gantaData.RealOpName = table.Rows[i]["realOpName"].ToString();
-                gantaData.PlannedStart = table.Rows[i]["PlannedStart"].ToString();
-                gantaData.PlannedFinish = table.Rows[i]["PlannedFinish"].ToString();
-                gantaData.ProductId = table.Rows[i]["ProductId"].ToString();
+                GantaData gantaData = new GantaData {
+                    RealOpName = table.Rows[i]["realOpName"].ToString(),
+                    PlannedStart = table.Rows[i]["PlannedStart"].ToString(),
+                    PlannedFinish = table.Rows[i]["PlannedFinish"].ToString(),
+                    ProductId = table.Rows[i]["ProductId"].ToString()
+                };
                 Gantt.Add(gantaData);
             }
             return Gantt;
@@ -166,84 +180,198 @@ namespace PlanMateWebApp.Models
             List<GantaData> list = new List<GantaData>();
             DataTable table = new DataTable();
             SqlCommand cmd = PMCommand.SchCmd();
-            cmd.CommandText = "Select realOpName,PlannedStart,PlanedFinish from PMS_Bars where WorkPlanID = '" + Workplaninfo.WorkPlanId + "' and PlannedStart > '"+ DateTime.Now.ToString()+"' order by realOpName,PlannedStart";
+            cmd.CommandText = "Select realOpName,PlannedStart,PlanedFinish from PMS_Bars where WorkPlanID = '" + Workplaninfo.WorkPlanId + "' and PlannedStart > '" + DateTime.Now.ToString() + "' order by realOpName,PlannedStart";
             SqlDataAdapter da = new SqlDataAdapter(cmd);
             da.Fill(table);
             da.Dispose();
             cmd.Connection.Dispose();
             for (int i = 0; i < table.Rows.Count; i++)
             {
-                GantaData gantaData = new GantaData();
-                gantaData.RealOpName = table.Rows[i]["realOpName"].ToString();
-                gantaData.PlannedStart = table.Rows[i]["PlannedStart"].ToString();
-                gantaData.PlannedFinish = table.Rows[i]["PlannedFinish"].ToString();
+                GantaData gantaData = new GantaData {
+                    RealOpName = table.Rows[i]["realOpName"].ToString(),
+                    PlannedStart = table.Rows[i]["PlannedStart"].ToString(),
+                    PlannedFinish = table.Rows[i]["PlannedFinish"].ToString()
+                };
                 list.Add(gantaData);
             }
             return list;
         }
+        /// <summary>
+        /// 获取订单列表的数据
+        /// </summary>
+        /// <returns>table</returns>
+        public DataTable WorkOrderData() {
+            GetWorkplanBars getWorkplanBars = new GetWorkplanBars();
+            //查看要查询数据库中的哪些列
+            JObject SQLWorkOrderFileds = PMAppSettings.TableFileds.SelectToken("SQLWorkOrderFiled").ToObject<JObject>();
+            string SQLWorkOrderFiled = "";
+            foreach (var item in SQLWorkOrderFileds)
+            {
+                if (string.IsNullOrEmpty(SQLWorkOrderFiled))
+                {
+                    SQLWorkOrderFiled += item.Key;
+                }
+                else
+                {
+                    SQLWorkOrderFiled += "," + item.Key;
+                }
+            }
+            DataTable dt = Workplaninfo.GetWorkOrder(SQLWorkOrderFiled, "isScheduleWorkID = '1'", string.Empty);
+            DataTable productId = Workplaninfo.GetWorkOrder("productID", "isScheduleWorkID = '1'", string.Empty);
+
+            foreach (var item in SQLWorkOrderFileds)
+            {
+                dt.Columns[item.Key].ColumnName = item.Value.Value<string>();
+            }
+            DataTable AttrTable = getWorkplanBars.GetAttrTable(productId);
+            JObject SQLAttrFiled = PMAppSettings.TableFileds.SelectToken("SQLAttrFiled").ToObject<JObject>();
+            foreach (var item in SQLAttrFiled)
+            {
+                dt.Columns.Add(item.Value.Value<string>());
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                for (int v = 0; v < AttrTable.Rows.Count; v++)
+                {
+                    if (AttrTable.Rows[v]["itemName"].ToString() == dt.Rows[i]["产品名称"].ToString())
+                    {
+                        foreach (DataColumn col in AttrTable.Columns)
+                        {
+                            if (col.ColumnName != "itemName")
+                            {
+                                dt.Rows[i][col.ColumnName] = AttrTable.Rows[v][col.ColumnName].ToString().Replace(" - ", " ").Replace("\"", "'");
+                            }
+                        }
+                    }
+                }
+            }
+            return dt;
+        }
+
     }
+}
 
     public class GetWorkplanBars
     {
+    /// <summary>
+    /// 查询设备下的数据信息
+    /// </summary>
+    /// <param name="optionPlan">设备名称</param>
+    /// <param name="ViewName"></param>
+    /// <returns></returns>
         public DataTable GetPlanBars(string optionPlan, string ViewName)
         {
             DataTable table = new DataTable();
-          
+            //查看要查询数据库中的哪些列
+            JObject SQLWorkPlanFileds = PMAppSettings.TableFileds.SelectToken("SQLWorkPlanFiled").ToObject<JObject>();
+            string SQLWorkPlanFiled = "";
+            foreach (var item in SQLWorkPlanFileds)
+            {
+                if (string.IsNullOrEmpty(SQLWorkPlanFiled))
+                {
+                    SQLWorkPlanFiled += item.Key;
+                }
+                else
+                {
+                    SQLWorkPlanFiled += "," + item.Key;
+                }
+            }
             if (ViewName == null)
             {
-                table = Workplaninfo.GetWorkPlanBars("WIPID ,itemWorkID,ProductID ,userDef_str1,allQuantity ,quantity,finishedQuantity,jobFinishedQty ,firstDemandDay,State ,route ,realOpName ,OperationID ,Lock,RealWorkTime ,PlannedStart ,PlannedFinish,PlannedSetup ,setupTime,finishStatus ,useFixStartDay ,schPri", "OperationID = '" + optionPlan + "'", string.Empty);
+                table = Workplaninfo.GetWorkPlanBars(SQLWorkPlanFiled, "OperationID = '" + optionPlan + "'", string.Empty);
             }
             else if (optionPlan == null)
             {
-                table = Workplaninfo.GetWorkPlanBars("WIPID ,itemWorkID,ProductID ,userDef_str1,allQuantity ,quantity,finishedQuantity,jobFinishedQty ,firstDemandDay,State ,route ,realOpName ,OperationID ,Lock,RealWorkTime ,PlannedStart ,PlannedFinish,PlannedSetup ,setupTime,finishStatus ,useFixStartDay ,schPri", "OperationID in ( select resName from View_pmViewGroup where VIewName = '" + ViewName + "')", string.Empty);
+                //table = Workplaninfo.GetWorkPlanBars("WIPID ,itemWorkID,ProductID ,userDef_str1,allQuantity ,quantity,finishedQuantity,jobFinishedQty ,firstDemandDay,State ,route ,realOpName ,OperationID ,Lock,RealWorkTime ,PlannedStart ,PlannedFinish,PlannedSetup ,setupTime,finishStatus ,useFixStartDay ,schPri", "OperationID in ( select resName from View_pmViewGroup where VIewName = '" + ViewName + "')", string.Empty);
+                table = Workplaninfo.GetWorkPlanBars(SQLWorkPlanFiled, "OperationID in ( select resName from View_pmViewGroup where VIewName = '" + ViewName + "')", string.Empty);
             }
-
-            table.Columns[0].ColumnName = "主工单";
-            table.Columns[1].ColumnName = "工单";
-            table.Columns[2].ColumnName = "产品";
-            table.Columns[3].ColumnName = "描述";
-            table.Columns[4].ColumnName = "工单总数";
-            table.Columns[5].ColumnName = "排程数量";
-            table.Columns[6].ColumnName = "完成数量";
-            table.Columns[7].ColumnName = "总完成数";
-            table.Columns[8].ColumnName = "需求日期";
-            table.Columns[9].ColumnName = "工单状态";
-            table.Columns[10].ColumnName = "流程";
-            table.Columns[11].ColumnName = "工序";
-            table.Columns[12].ColumnName = "设备";
-            table.Columns[13].ColumnName = "锁定";
-            table.Columns[14].ColumnName = "生产时长";
-            table.Columns[15].ColumnName = "计划开始";
-            table.Columns[16].ColumnName = "计划结束";
-            table.Columns[17].ColumnName = "切换开始";
-            table.Columns[18].ColumnName = "切换时间";
-            table.Columns[19].ColumnName = "完成状态";
-            table.Columns[20].ColumnName = "固定开工"; 
-            table.Columns[21].ColumnName = "优先级";
+            foreach (var item in SQLWorkPlanFileds)
+            {
+                table.Columns[item.Key].ColumnName = item.Value.Value<string>();
+            }
             table.Columns.Add("temp", Type.GetType("System.Decimal"));
             table.Columns.Add("temp1", Type.GetType("System.Decimal"));
             for (int i = 0; i < table.Rows.Count; i++)
             {
-                decimal productTime = Convert.ToDecimal(table.Rows[i][14]) / 3600;
+                decimal productTime = Convert.ToDecimal(table.Rows[i][SQLWorkPlanFileds["RealWorkTime"].ToString()]) / 3600;
                 productTime = Math.Round(productTime, 2);
-                table.Rows[i][22] = productTime;
-                decimal setupTime = Convert.ToDecimal(table.Rows[i][18]) / 60;
+                table.Rows[i]["temp"] = productTime;
+                decimal setupTime = Convert.ToDecimal(table.Rows[i][SQLWorkPlanFileds["setupTime"].ToString()]) / 60;
                 setupTime = Math.Round(setupTime, 2);
-                table.Rows[i][23] = setupTime;
-
+                table.Rows[i]["temp1"] = setupTime;
             }
-            table.Columns.RemoveAt(14);
-            table.Columns[21].SetOrdinal(14);
-            table.Columns[14].ColumnName = "生产时长";
-            table.Columns.RemoveAt(18);
-            table.Columns[21].SetOrdinal(18);
-            table.Columns[18].ColumnName = "切换时间";
+            table.Columns.Remove(SQLWorkPlanFileds["RealWorkTime"].ToString());
+            table.Columns["temp"].ColumnName = SQLWorkPlanFileds["RealWorkTime"].ToString();
+            table.Columns.Remove(SQLWorkPlanFileds["setupTime"].ToString());
+            table.Columns["temp1"].ColumnName = SQLWorkPlanFileds["setupTime"].ToString();
             table.AcceptChanges();
-            //return PMPublicFuncs.DatatableToJson(table);
             return table;
         }
-    }
 
+        public DataTable GetAttrTable(DataTable productID)
+        {
+            DataTable table = new DataTable();
+            JObject SQLFileds = PMAppSettings.TableFileds.SelectToken("SQLAttrFiled").ToObject<JObject>();
+            string SQLFiledStr = "itemName";
+            string productStr = "";
+            for (int i = 0; i < productID.Rows.Count; i++)
+            {
+                if (i < productID.Rows.Count - 1)
+                {
+                    productStr += "'" + productID.Rows[i][0].ToString() + "',";
+                }
+                else
+                {
+                    productStr += "'" + productID.Rows[i][0].ToString() + "'";
+
+                }
+            }
+            foreach (var item in SQLFileds)
+            {
+                SQLFiledStr += "," + item.Key;
+            }
+            SqlCommand cmd = PMCommand.ModCmd();
+            cmd.CommandText = "Select " + SQLFiledStr + " from objProduct where sysID = '" + PMStaticModels.UserModels.PMUser.UserSysID + "' and itemName in (" + productStr + ")";
+            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            da.Fill(table);
+            da.Dispose();
+            cmd.Connection.Dispose();
+            foreach (var item in SQLFileds)
+            {
+                table.Columns[item.Key].ColumnName = item.Value.Value<string>();
+            }
+            return table;
+        }
+    
+        public DataTable GetAllPlanData()
+    {
+        DataTable table = new DataTable();
+        JObject SQLWorkOrderFileds = PMAppSettings.TableFileds.SelectToken("SQLWorkPlanFiled").ToObject<JObject>();
+        string SQLWorkPlanFiled = "";
+        foreach (var item in SQLWorkOrderFileds)
+        {
+            if (string.IsNullOrEmpty(SQLWorkPlanFiled))
+            {
+                SQLWorkPlanFiled += item.Key;
+            }
+            else
+            {
+                SQLWorkPlanFiled += "," + item.Key;
+            }
+        }
+        SqlCommand cmd = PMCommand.SchCmd();
+        cmd.CommandText = "select "+ SQLWorkPlanFiled+ " from View_WorkPlansBars where WorkPlanID in (select WorkPlanID from PMS_WorkPlans where Status = 'Released' and sysid = '"+PMUser.UserSysID+"')";
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+        da.Fill(table);
+        da.Dispose();
+        cmd.Connection.Dispose();
+        foreach (var item in SQLWorkOrderFileds)
+        {
+            table.Columns[item.Key].ColumnName = item.Value.Value<string>();
+        }
+        return table;
+    }
+}
     public class OrderForm
     {
         public static string[] ErrorTime;
@@ -309,5 +437,6 @@ namespace PlanMateWebApp.Models
             }
         }
     }
-}
+
+ 
 

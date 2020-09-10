@@ -24,7 +24,7 @@
             let self = this;
             this.btn.each(function (index, ele) {
                 $(ele).hover(function () {
-                    $('.BottomContent').Advertisement(self.Advertisement[index]);
+                $('.BottomContent').Advertisement(self.Advertisement[index]);
                 }, function () { $('.BottomContent').Advertisement(self.Advertisement[0]); })
             })
         },
@@ -33,11 +33,23 @@
                 if (response == false) {
                     //查看用户是否有权限
                     $.get("/Selector/FunctionResult").done(function (response) {
-                        response = JSON.parse(response);
-                        console.log(response)
-                        response.forEach(function (ele) {
-                            $("#" + ele).css({ display: 'block' });
-                        })
+                        try {
+                            response = JSON.parse(response);
+                            console.log(response);
+                            if (response.length == 0) {
+                                alert("您没有权限");
+                                location.replace = "/index"
+                            } else {
+                                response.forEach(function (ele) {
+                                    if (ele != 'reportsystem') {
+                                        $("#" + ele).css({ display: 'block' });
+                                    }
+                                })
+                            }
+                        } catch (e) {
+                            alert("您没有权限");
+                            location.replace = "/index"
+                        }
                     })
                 } else if (response == true) {
                     $(".userBtn").css({ display: 'block' })

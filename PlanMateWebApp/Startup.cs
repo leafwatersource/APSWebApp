@@ -1,10 +1,19 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using PMSettings;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Data;
+using System.IO;
+using System.Linq;
+using System.Xml;
 
 namespace PlanMateWebApp
 {
@@ -15,7 +24,8 @@ namespace PlanMateWebApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-            services.AddMvcCore().AddNewtonsoftJson(options => {
+            services.AddMvcCore()
+                .AddNewtonsoftJson(options => {
                 options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
             });
             // RegisterMyServices(services);
@@ -44,98 +54,84 @@ namespace PlanMateWebApp
         public IConfiguration Configuration { get; }
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
-            var settings = Configuration.GetSection("PMSettings").GetChildren();
-            if(PMAppSettings.PMSettings.Columns.Count< 1)
+            string filepach = AppContext.BaseDirectory;
+            PMAppSettings.BasePath = AppContext.BaseDirectory;
+            XmlDocument document = new XmlDocument();
+            document.Load(filepach + "appsettings.xml");
+            XmlNode TableFileConfig = document.SelectSingleNode("AppSetting").SelectSingleNode("TableFileds");
+            XmlNode ConnectionConfig = document.SelectSingleNode("AppSetting").SelectSingleNode("ConnectionStrings");
+            XmlNode PMSettingsConfig = document.SelectSingleNode("AppSetting").SelectSingleNode("PMSettings");
+            XmlNodeList ConnectionList = ConnectionConfig.ChildNodes;
+            XmlNodeList TableFiledsConfigList = TableFileConfig.ChildNodes;
+            XmlNodeList PMSettingConfigList = PMSettingsConfig.ChildNodes;
+            PMAppSettings.TableFileds = new JObject();
+            JObject temp;
+            foreach (XmlNode item in TableFiledsConfigList)
             {
-                PMAppSettings.PMSettings.Columns.Add("KEY");
-                PMAppSettings.PMSettings.Columns.Add("VALUE");
-                PMAppSettings.PMSettings.Columns.Add("PACH");
+                XmlNodeList xl = item.ChildNodes;
+                temp = new JObject();
+                foreach (XmlNode filed in xl)
+                {
+                   temp.Add(filed.Name, filed.InnerText);
+                }
+                PMAppSettings.TableFileds.Add(item.Name.ToString(), temp);
             }
-            foreach (var item in settings)
+
+            foreach (XmlNode item in ConnectionList)
             {
-                string pmkey = item.Key.ToString();
-                string pmvalue = item.Value.ToString();
-                string pmsettingspach = item.Path.ToString();
-                DataRow dr = PMAppSettings.PMSettings.NewRow();
-                dr[0] = pmkey;
-                dr[1] = pmvalue;
-                dr[2] = pmsettingspach;
-                PMAppSettings.PMSettings.Rows.Add(dr);                     
-                if(item.Key.ToString().ToLower().Contains("plstate"))
+                if (item.Name.ToLower() == "mod")
                 {
-                    PMAppSettings.PMPlState = item.Value.ToString();
+                    PMAppSettings.Modconnstr = item.InnerText;
                 }
-                else if (item.Key.ToString().ToLower().Contains("ocstate"))
+                else if (item.Name.ToLower() == "sch")
                 {
-                    PMAppSettings.PMOcState = item.Value.ToString();
+                    PMAppSettings.Schconnstr = item.InnerText;
                 }
-                else if (item.Key.ToString().ToLower().Contains("showattr"))
+                else
                 {
-                    PMAppSettings.ItemAttrCount = item.Value.ToString();
-                }
-                else if (item.Key.ToString().ToLower() == "attr1")
-                {
-                    PMAppSettings.ItemGroup.Columns.Add("ItemAttr1");
-                    DataRow row = PMAppSettings.ItemGroup.NewRow();
-                    row[0] = item.Value.ToString();
-                    PMAppSettings.ItemGroup.Rows.Add(row);
-                    //AppSettings.ItemGroup.Rows[0]["ItemAttr1"] = item.Value.ToString();
-                }
-                else if (item.Key.ToString().ToLower() == "attr2")
-                {
-                    PMAppSettings.ItemGroup.Columns.Add("ItemAttr2");
-                    PMAppSettings.ItemGroup.Rows[0]["ItemAttr2"] = item.Value.ToString();
-                }
-                else if (item.Key.ToString().ToLower() == "attr3")
-                {
-                    PMAppSettings.ItemGroup.Columns.Add("ItemAttr3");
-                    PMAppSettings.ItemGroup.Rows[0]["ItemAttr3"] = item.Value.ToString();
-                }
-                else if (item.Key.ToString().ToLower() == "attr4")
-                {
-                    PMAppSettings.ItemGroup.Columns.Add("ItemAttr4");
-                    PMAppSettings.ItemGroup.Rows[0]["ItemAttr4"] = item.Value.ToString();
-                }
-                else if (item.Key.ToString().ToLower()== "attr5")
-                {
-                    PMAppSettings.ItemGroup.Columns.Add("ItemAttr5");
-                    PMAppSettings.ItemGroup.Rows[0]["ItemAttr5"] = item.Value.ToString();
-                }
-                else if (item.Key.ToString().ToLower() == "attr6")
-                {
-                    PMAppSettings.ItemGroup.Columns.Add("ItemAttr6");
-                    PMAppSettings.ItemGroup.Rows[0]["ItemAttr6"] = item.Value.ToString();
-                }
-                else if (item.Key.ToString().ToLower() == "attr7")
-                {
-                    PMAppSettings.ItemGroup.Columns.Add("ItemAttr7");
-                    PMAppSettings.ItemGroup.Rows[0]["ItemAttr7"] = item.Value.ToString();
-                }
-                else if (item.Key.ToString().ToLower() =="attr8")
-                {
-                    PMAppSettings.ItemGroup.Columns.Add("ItemAttr8");
-                    PMAppSettings.ItemGroup.Rows[0]["ItemAttr8"] = item.Value.ToString();
-                }
-                else if (item.Key.ToString().ToLower() == "attr9")
-                {
-                    PMAppSettings.ItemGroup.Columns.Add("ItemAttr9");
-                    PMAppSettings.ItemGroup.Rows[0]["ItemAttr9"] = item.Value.ToString();
-                }
-                else if (item.Key.ToString().ToLower() == "attr10")
-                {
-                    PMAppSettings.ItemGroup.Columns.Add("ItemAttr10");
-                    PMAppSettings.ItemGroup.Rows[0]["ItemAttr10"] = item.Value.ToString();
-                }
-                else if (item.Key.ToString().ToLower() == "itemweight")
-                {
-                    PMAppSettings.ItemGroup.Columns.Add("itemWeight");
-                    PMAppSettings.ItemGroup.Rows[0]["itemWeight"] = item.Value.ToString();
+                    PMAppSettings.Ctrlconnstr = item.InnerText;
                 }
             }
-            PMAppSettings.Modconnstr = Configuration.GetConnectionString("Mod"); 
-            PMAppSettings.Ctrlconnstr = Configuration.GetConnectionString("Ctrl");
-            PMAppSettings.Schconnstr = Configuration.GetConnectionString("Sch");          
+            foreach (XmlNode item in PMSettingConfigList)
+            {
+                if (item.Name.ToLower() == "plstate")
+                {
+                    PMAppSettings.PMPlState = item.InnerText;
+                }
+                else if (item.Name.ToLower() == "ocstate")
+                {
+                    PMAppSettings.PMOcState = item.InnerText;
+                }
+            }
+
+            //Configuration = configuration;
+            //var settings = Configuration.GetSection("PMSettings").GetChildren();
+            //if (PMAppSettings.PMSettings.Columns.Count< 1)
+            //{
+            //    PMAppSettings.PMSettings.Columns.Add("KEY");
+            //    PMAppSettings.PMSettings.Columns.Add("VALUE");
+            //    PMAppSettings.PMSettings.Columns.Add("PACH");
+            //}
+            //foreach (var item in settings)
+            //{
+            //    string pmkey = item.Key.ToString();
+            //    string pmvalue = item.Value.ToString();
+            //    string pmsettingspach = item.Path.ToString();
+            //    DataRow dr = PMAppSettings.PMSettings.NewRow();
+            //    dr[0] = pmkey;
+            //    dr[1] = pmvalue;
+            //    dr[2] = pmsettingspach;
+            //    PMAppSettings.PMSettings.Rows.Add(dr);                     
+            //    if(item.Key.ToString().ToLower().Contains("plstate"))
+            //    {
+            //        PMAppSettings.PMPlState = item.Value.ToString();
+            //    }
+            //    else if (item.Key.ToString().ToLower().Contains("ocstate"))
+            //    {
+            //        PMAppSettings.PMOcState = item.Value.ToString();
+            //    }
+               
+            //} 
         }
     }
 }

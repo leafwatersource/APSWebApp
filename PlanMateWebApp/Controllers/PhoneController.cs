@@ -14,11 +14,13 @@ namespace PlanMateWebApp.Controllers
     {
         public IActionResult Index()
         {
-            if (string.IsNullOrEmpty(PMUser.EmpID))
+            string[] UserIDList = PMUser.UserMessage.Select(x => x.EmpID).ToArray();
+            bool UserID = UserIDList.Contains<string>(HttpContext.Request.Cookies["EmpID"]);
+            if (!UserID)
             {
                 return RedirectToAction("Index", "Index");
             }
-            else if (HttpContext.Request.Cookies["UserGuid"] != PMUser.GetuserGuid(PMUser.EmpID))
+            else if (HttpContext.Request.Cookies["UserGuid"] != PMUser.GetuserGuid(HttpContext.Request.Cookies["EmpID"]))
             {
                 return RedirectToAction("Index", "Index");
             }

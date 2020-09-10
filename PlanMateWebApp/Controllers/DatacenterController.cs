@@ -14,6 +14,8 @@ using Newtonsoft.Json;
 using static System.Net.Mime.MediaTypeNames;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
+using System.Diagnostics;
+using System.Threading;
 
 namespace PlanMateWebApp.Controllers
 {
@@ -23,12 +25,18 @@ namespace PlanMateWebApp.Controllers
     {
        
         public IActionResult Index()
-        {            
-            if (PMUser.EmpID ==string.Empty)
+        {
+            string[] UserIDList = PMUser.UserMessage.Select(x => x.EmpID).ToArray();
+            bool UserID = UserIDList.Contains<string>(HttpContext.Request.Cookies["EmpID"]);
+            //if (PMUser.EmpID ==string.Empty)
+            //{
+            //    return RedirectToAction("Index", "Index");
+            //}
+            if (!UserID)
             {
                 return RedirectToAction("Index", "Index");
             }
-            else if (HttpContext.Request.Cookies["UserGuid"] != PMUser.GetuserGuid(PMUser.EmpID))
+            else if (HttpContext.Request.Cookies["UserGuid"] != PMUser.GetuserGuid(HttpContext.Request.Cookies["EmpID"]))
             {
                 return RedirectToAction("Index", "Index");
             }
@@ -52,17 +60,15 @@ namespace PlanMateWebApp.Controllers
                 return View(data);
             }
         }
-        public IActionResult TextPage()
-        {
-            return View();
-        }
         public IActionResult Implementation()
-        {           
-            if (PMUser.EmpID == string.Empty)
+        {
+            string[] UserIDList = PMUser.UserMessage.Select(x => x.EmpID).ToArray();
+            bool UserID = UserIDList.Contains<string>(HttpContext.Request.Cookies["EmpID"]);
+            if (!UserID)
             {
                 return RedirectToAction("Index", "Index");
             }
-            else if (HttpContext.Request.Cookies["UserGuid"] != PMUser.GetuserGuid(PMUser.EmpID))
+            else if (HttpContext.Request.Cookies["UserGuid"] != PMUser.GetuserGuid(HttpContext.Request.Cookies["EmpID"]))
             {
                 return RedirectToAction("Index", "Index");
             }
@@ -77,12 +83,19 @@ namespace PlanMateWebApp.Controllers
             }
         }
         public IActionResult HistoryData()
-        {            
-            if (PMUser.EmpID == string.Empty)
+        {
+
+            string[] UserIDList = PMUser.UserMessage.Select(x => x.EmpID).ToArray();
+            bool UserID = UserIDList.Contains<string>(HttpContext.Request.Cookies["EmpID"]);
+            //if (PMUser.EmpID ==string.Empty)
+            //{
+            //    return RedirectToAction("Index", "Index");
+            //}
+            if (!UserID)
             {
                 return RedirectToAction("Index", "Index");
             }
-            else if (HttpContext.Request.Cookies["UserGuid"] != PMUser.GetuserGuid(PMUser.EmpID))
+            else if (HttpContext.Request.Cookies["UserGuid"] != PMUser.GetuserGuid(HttpContext.Request.Cookies["EmpID"]))
             {
                 return RedirectToAction("Index", "Index");
             }
@@ -97,11 +110,18 @@ namespace PlanMateWebApp.Controllers
         }
         public IActionResult Record()
         {
-            if (PMUser.EmpID == String.Empty)
+
+            string[] UserIDList = PMUser.UserMessage.Select(x => x.EmpID).ToArray();
+            bool UserID = UserIDList.Contains<string>(HttpContext.Request.Cookies["EmpID"]);
+            //if (PMUser.EmpID ==string.Empty)
+            //{
+            //    return RedirectToAction("Index", "Index");
+            //}
+            if (!UserID)
             {
                 return RedirectToAction("Index", "Index");
             }
-            else if (HttpContext.Request.Cookies["UserGuid"] != PMUser.GetuserGuid(PMUser.EmpID))
+            else if (HttpContext.Request.Cookies["UserGuid"] != PMUser.GetuserGuid(HttpContext.Request.Cookies["EmpID"]))
             {
                 return RedirectToAction("Index", "Index");
             }
@@ -112,11 +132,18 @@ namespace PlanMateWebApp.Controllers
         }
         public IActionResult UserSettings()
         {
-            if (PMUser.EmpID == String.Empty)
+
+            string[] UserIDList = PMUser.UserMessage.Select(x => x.EmpID).ToArray();
+            bool UserID = UserIDList.Contains<string>(HttpContext.Request.Cookies["EmpID"]);
+            //if (PMUser.EmpID ==string.Empty)
+            //{
+            //    return RedirectToAction("Index", "Index");
+            //}
+            if (!UserID)
             {
                 return RedirectToAction("Index", "Index");
             }
-            else if (HttpContext.Request.Cookies["UserGuid"] != PMUser.GetuserGuid(PMUser.EmpID))
+            else if (HttpContext.Request.Cookies["UserGuid"] != PMUser.GetuserGuid(HttpContext.Request.Cookies["EmpID"]))
             {
                 return RedirectToAction("Index", "Index");
             }
@@ -130,76 +157,37 @@ namespace PlanMateWebApp.Controllers
         /// </summary>
         /// <returns></returns>
         public ActionResult TableFiled(string tableName) {
-            string jsonfile ="filed.json";//JSON文件路径
-            using (System.IO.StreamReader file = System.IO.File.OpenText(jsonfile))
+            if (tableName == "WorkOrder")
             {
-                using (JsonTextReader reader = new JsonTextReader(file))
+                JObject order = PMAppSettings.TableFileds.SelectToken("SQLWorkOrderFiled").ToObject<JObject>();
+                foreach (var item in PMAppSettings.TableFileds.SelectToken("SQLAttrFiled").ToObject<JObject>())
                 {
-                    JObject filed = (JObject)JToken.ReadFrom(reader);
-                    if (tableName == "WorkOrder")
-                    {
-                        return Ok(filed["ShowWorkOrderFiled"]);
-
-                    }
-                    else if(tableName == "WorkPlan")
-                    {
-                        return Ok(filed["ShowWorkPlanFiled"]);
-                    }
-                    else
-                    {
-                        return Ok(111);
-                    }
+                    order.Add(item.Key, item.Value);
                 }
+                return Ok(order);
             }
+            else if (tableName == "WorkPlan")
+            {
+                return Ok(PMAppSettings.TableFileds.SelectToken("SQLWorkPlanFiled").ToObject<JObject>());
+            }
+            else if (tableName=="History")
+            {
+                return Ok(PMAppSettings.TableFileds.SelectToken("HistoryTableFiled").ToObject<JObject>());
+            }
+            return Ok("表格的列查询错误");
         }
         public ActionResult DTworkOrder() {
-            DataTable dt = Workplaninfo.GetWorkOrder("workID,productID,allQuantity,desp,planStartTime,planFinishTime,firstDemandDay,delayDays", "isScheduleWorkID = '1'", string.Empty);
-            DataTable productId = Workplaninfo.GetWorkOrder("productID", "isScheduleWorkID = '1'", string.Empty);
-            dt.Columns["productID"].ColumnName = "产品名称";
-            DataTable AttrTable = Workplaninfo.GetAttrTable(productId);
-            dt.Columns["workID"].ColumnName = "工单号码";
-            dt.Columns["allQuantity"].ColumnName = "工单总数";
-            dt.Columns["desp"].ColumnName = "描述";
-            dt.Columns["planStartTime"].ColumnName = "计划开始时间";
-            dt.Columns["planFinishTime"].ColumnName = "计划结束时间";
-            dt.Columns["firstDemandDay"].ColumnName = "需求日期";
-            dt.Columns["delayDays"].ColumnName = "延迟天数";
-            for (int i = 1; i <= Convert.ToInt32(PMAppSettings.ItemAttrCount); i++)
-            {
-                if (i == Convert.ToInt32(PMAppSettings.ItemAttrCount))
-                {
-                    AttrTable.Columns["itemWeight"].ColumnName = PMAppSettings.ItemGroup.Rows[0]["itemWeight"].ToString();
-                    dt.Columns.Add(PMAppSettings.ItemGroup.Rows[0]["ItemWeight"].ToString());
-                }
-                else
-                {
-                    AttrTable.Columns["ItemAttr" + i].ColumnName = PMAppSettings.ItemGroup.Rows[0]["ItemAttr" + i].ToString();
-                    dt.Columns.Add(PMAppSettings.ItemGroup.Rows[0]["ItemAttr" + i].ToString());
-                }
-            }
-            for (int i = 0; i < dt.Rows.Count; i++)
-            {
-                for (int v = 0; v < AttrTable.Rows.Count; v++)
-                {
-                    if (AttrTable.Rows[v]["itemName"].ToString() == dt.Rows[i]["产品名称"].ToString())
-                    {
-                        foreach (DataColumn col in AttrTable.Columns)
-                        {
-                            if (col.ColumnName != "itemName")
-                            {
-                                dt.Rows[i][col.ColumnName] = AttrTable.Rows[v][col.ColumnName].ToString().Replace(" - ", " ").Replace("\"", "'");
-                            }
-                        }
-                    }
-                }
-            }
-            JObject tableData = new JObject();
-            tableData.Add("total", dt.Rows.Count);
-            tableData.Add("rows", JsonConvert.SerializeObject(dt));
-            JObject data = new JObject();
-            data.Add("code", "0");
-            data.Add("data", tableData);
-            data.Add("msg", "successful");
+            MDatacenter mDatacenter = new MDatacenter();
+            DataTable dt = mDatacenter.WorkOrderData();
+            JObject tableData = new JObject {
+                { "total", dt.Rows.Count },
+                { "rows", JsonConvert.SerializeObject(dt) }
+            };
+            JObject data = new JObject {
+                { "code", "0"},
+                { "data", tableData},
+                { "msg", "successful"}
+            };
             return Ok(data);
         }
         public string NavName()
@@ -215,23 +203,28 @@ namespace PlanMateWebApp.Controllers
         public string GetWorkPlanBars(string plan, string ViewName)
         {
             GetWorkplanBars PlanInfo = new GetWorkplanBars();
-            DataTable table = new DataTable();
-            table = PlanInfo.GetPlanBars(plan,ViewName);
+            DataTable table =  PlanInfo.GetPlanBars(plan,ViewName);
             return PMPublicFuncs.DatatableToJson(table);
         }
+        /// <summary>
+        /// 执行计划的表格
+        /// </summary>
+        /// <param name="plan">计划名称</param>
+        /// <param name="ViewName">设备名称</param>
+        /// <returns></returns>
         public ActionResult WorkPlanBar(string plan, string ViewName) {
             GetWorkplanBars PlanInfo = new GetWorkplanBars();
-            DataTable table = new DataTable();
-            table = PlanInfo.GetPlanBars(plan, ViewName);
-            string JsonString = string.Empty;
-            JsonString = JsonConvert.SerializeObject(table);
-            JObject tableData = new JObject();
-            tableData.Add("total", table.Rows.Count);
-            tableData.Add("rows", JsonString);
-            JObject data = new JObject();
-            data.Add("code", "0");
-            data.Add("data", tableData);
-            data.Add("msg", "successful");
+            DataTable table =  PlanInfo.GetPlanBars(plan, ViewName);
+            string JsonString =  JsonConvert.SerializeObject(table);
+            JObject tableData = new JObject {
+                { "total", table.Rows.Count},
+                { "rows", JsonString}
+            };
+            JObject data = new JObject {
+                { "code", "0"},
+                {"data", tableData },
+                { "msg", "successful"}
+            };
             return Ok(data);
 
         }
@@ -279,6 +272,47 @@ namespace PlanMateWebApp.Controllers
         {
             MDatacenter mDatacenter = new MDatacenter();
             return mDatacenter.GetTodayGantattData();
+        }
+        public ActionResult GetHistoryTable()
+        {
+            MDHistory mDHistory = new MDHistory();
+
+            return Ok(mDHistory.MGetHistoryData());
+        }
+
+        /// <summary>
+        /// 订单列表的导出功能
+        /// </summary>
+        /// <returns>路径让浏览器下载</returns>
+        public ActionResult ExportDataCenter()
+        {
+            MDatacenter mDatacenter = new MDatacenter();
+            DataTable table = mDatacenter.WorkOrderData();
+            string path = ExportExcel.Excel(table, "订单列表_"+PMUser.UserGuid+".xlsx", "订单数据");
+            Task.Run(() =>
+            {
+                Thread.Sleep(30000);
+                ExportExcel.DelExcel("订单列表_" + PMUser.UserGuid);
+            });
+            return Ok(path);
+        }
+   
+
+        /// <summary>
+        /// 导出计划列表
+        /// </summary>
+        /// <returns>路径让浏览器下载</returns>
+        public ActionResult ExportPlanData()
+        {
+            GetWorkplanBars getWorkplanBars = new GetWorkplanBars();
+            DataTable table = getWorkplanBars.GetAllPlanData();
+            string path = ExportExcel.Excel(table, "计划列表_" + PMUser.UserGuid + ".xlsx", "计划数据");
+            Task.Run(() =>
+            {
+                Thread.Sleep(30000);
+                ExportExcel.DelExcel("计划列表_" + PMUser.UserGuid);
+            });
+            return Ok(path);
         }
     }
 }

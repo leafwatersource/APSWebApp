@@ -38,6 +38,12 @@ namespace PlanMateWebApp.Controllers
                 // 将得到的字符串使用十六进制类型格式。格式后的字符是小写的字母，如果使用大写（X）则格式后的字符是大写字符 
                 userPass += s[i].ToString("X");
             }
+            User user = new User();
+            user.EmpID = empID;
+            user.UserPass = userPass;
+            user.UserIpAdress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+            user.UserWeb = Request.Headers["User-Agent"];
+
             PMUser.EmpID = empID;
             PMUser.UserPass = userPass;
             PMUser.UserIpAdress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
@@ -53,10 +59,14 @@ namespace PlanMateWebApp.Controllers
                 }
                 else
                 {
+                    user.UserGuid = userMsg.UserGuid;
+                    user.UserName = login.GetempName(empID);
+
                     PMUser.UserGuid = userMsg.UserGuid;
                     PMUser.UserName = login.GetempName(empID);
-                    Response.Cookies.Append("EmpID", PMUser.EmpID, new CookieOptions() { IsEssential = true });
-                    Response.Cookies.Append("UserGuid", PMUser.UserGuid, new CookieOptions() { IsEssential = true });
+                    Response.Cookies.Append("EmpID", user.EmpID);
+                    //Response.Cookies.Append("EmpID", PMUser.EmpID);
+                    Response.Cookies.Append("UserGuid", PMUser.UserGuid);
                 }
 
                 if (adminstate == "1")
@@ -70,7 +80,8 @@ namespace PlanMateWebApp.Controllers
                     else
                     {
                         string md5Guid = Guid.NewGuid().ToString();
-                        Response.Cookies.Append("MD5", PMPublicFuncs.GetMd5("ADMIN" + md5Guid), new CookieOptions() { IsEssential = true });
+                        Response.Cookies.Append("MD5", PMPublicFuncs.GetMd5("ADMIN" + md5Guid));
+                        //Response.Cookies.Append("MD5", PMPublicFuncs.GetMd5("ADMIN" + md5Guid), new CookieOptions() { IsEssential = true });
                         PMPublicFuncs.WriteLogs(empID, login.GetempName(empID), PMUser.UserIpAdress, "管理员登录", DateTime.Now, "管理员登陆成功。", PMUser.UserWeb);
                         //管理员登录成功
                     }
@@ -106,6 +117,7 @@ namespace PlanMateWebApp.Controllers
                             PMUser.FunctionList.Add("planboard");
                         }
                     }
+                    PMUser.UserMessage.Add(user);
                     //登录成功
                     PMPublicFuncs.WriteLogs(empID, login.GetempName(empID), PMUser.UserIpAdress, "用户登陆", DateTime.Now, "用户登陆成功。", PMUser.UserWeb);
                 }
@@ -119,7 +131,6 @@ namespace PlanMateWebApp.Controllers
             {
                 login = new MLogin();
             }
-
             PMUser.EmpID = empID;
             PMUser.UserPass = userPass;
             PMUser.UserIpAdress = HttpContext.Connection.LocalIpAddress.ToString();

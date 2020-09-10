@@ -14,6 +14,7 @@
         <div class="card-header">
             <span><i class="fa fa-laptop" aria-hidden="true"></i> </span>
             <span>设备名称</span>
+            <input id="SearchRes" placeholder="请输入设备名称" style="padding:0 4px;" />
             <span style="float:right" id="allEquipment"><a href="#">所有设备</a></span>
         </div>
         <div class="card-body">
@@ -29,6 +30,7 @@
         </div>
     </div>
     <div class="table_box">
+        <button class="ExportBtn" id="ExportBtn">导出数据</button>
         <div class="filterGroup"> </div>
         <div id="toolbar"></div>
         <table class="table text-nowrap table-striped"
@@ -44,8 +46,6 @@
                data-page-size="25"
                data-show-footer="false"
                data-side-pagination="client"
-               data-show-export="true"
-               data-export-types="['excel', 'pdf]"
                data-click-to-select="true">
         </table>
     </div>

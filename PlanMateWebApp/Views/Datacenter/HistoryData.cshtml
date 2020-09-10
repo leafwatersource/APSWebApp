@@ -3,5 +3,28 @@
     ViewData["Title"] = "历史数据";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
-<h1>HistoryData</h1>
+<script src="~/js/HistoryData.js"></script>
+<div class="content">
+    <h1 style="text-align:center;">用户的操作记录</h1>
+    <div class="table_box">
+        <div class="filterGroup"> </div>
+        <div id="toolbar"></div>
+        <table class="table text-nowrap table-striped"
+               id="table-request"
+               data-toggle="table"
+               data-maintain-selected="true"
+               data-sort-name="Zeitpunkt"
+               data-sort-order="asc"
+               data-search="true"
+               data-show-pagination-switch="true"
+               data-pagination="true"
+               data-page-list="[10, 25, 50, 100, ALL]"
+               data-page-size="25"
+               data-show-footer="false"
+               data-side-pagination="client"
+               data-show-export="true"
+               data-export-types="['excel', 'pdf]"
+               data-click-to-select="true">
+        </table>
+    </div>
+</div>

@@ -11,7 +11,7 @@
             <div class="text-right">当前计划发布日期：@ViewBag.ReleaseTime，最后计划发布人：@ViewBag.Owner，计划发布名称：@ViewBag.WorkPlanName</div>
         </div>
     </div>
-    <div class="row">
+    <div class="row message_box">
         <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
             <div class="card text-white bg-primary mb-3">
                 <div class="card-header">
@@ -57,12 +57,9 @@
         <div class="col col-8 orderInfo">
             <i class="fa fa-table mr-1" aria-hidden="true"></i>客户订单详情
         </div>
-        <div class="col col-4 orderBtn">
-            @*导出数据按钮*@
-            <a href="#" id="exportExcel"></a>
-        </div>
     </div>
     <div class="table_box">
+        <button class="ExportBtn" id="ExportBtn">导出数据</button>
         <div class="filterGroup"></div>
         <div id="toolbar"></div>
         <table class="table text-nowrap table-striped"
@@ -78,20 +75,22 @@
                data-page-size="25"
                data-show-footer="false"
                data-side-pagination="client"
-               data-show-export="true"
-               data-export-types="['excel', 'pdf]"
-               data-export-options='{
-              }'
                data-click-to-select="true">
         </table>
-        <div class="container-fluid">
-            <div class="row">
+        <!--<div class="container-fluid">
+            <div class="row">-->
                 @*<div id="echart" style="width: 100%;height:800px;"></div>*@
-                <div id="jobschedules" style="height: 400px; width: 100%"></div>
+                <!--<div id="jobschedules" style="height: 400px; width: 100%"></div>
             </div>
-        </div>
+        </div>-->
     </div>
 </div>
 <script src="~/js/orderConfirm.js"></script>
 <script src="~/js/jquery.stacked-gantt.min.js"></script>
-<script src="~/js/MyGanttData.js"></script>
+@*<script src="~/js/MyGanttData.js"></script>*@
+<script>
+    let height = $(".top").height() + $('.alertBox').height() + $('.InfoBox').height() + $('.orderInfo').height() + $('.message_box').height() + 48;
+    $(document).ready(function () {
+        $('.fixed-height').height($(window).height() - height);
+    });
+</script>

@@ -6,6 +6,7 @@ using System.Text;
 using PMSettings;
 using PMStaticModels;
 
+using PMStaticModels.PlanModels;
 namespace PMStaticModels.PlanModels
 {
    
@@ -83,48 +84,6 @@ namespace PMStaticModels.PlanModels
             da.Dispose();
             cmd.Connection.Dispose();            
             return table;
-        }
-        public static DataTable GetAttrTable(DataTable table)
-        {
-            //此方法是获取五个属性值，返回的是要给table，传入的table是产品的id值
-            string temp = string.Empty;
-            DataTable NewTable = new DataTable();
-            string attrstr = string.Empty;
-            for (int i = 0; i < table.Rows.Count; i++)
-            {
-                if (i < table.Rows.Count - 1)
-                {
-                    temp += "'" + table.Rows[i][0].ToString() + "',";
-                }
-                else
-                {
-                    temp += "'" + table.Rows[i][0].ToString() + "'";
-
-                }
-            }
-            for (int i = 1; i <=Convert.ToInt32( PMAppSettings.ItemAttrCount); i++)
-            {
-                if (i == 11)
-                {
-                    attrstr += ",itemWeight";
-                    continue;
-                }
-                if (attrstr == string.Empty)
-                {
-                    attrstr = "itemName,itemAttr" + i;
-                }
-                else
-                {
-                    attrstr += ",itemAttr" + i;
-                }
-            }
-            SqlCommand cmd = PMCommand.ModCmd();
-            cmd.CommandText = "Select "+ attrstr + " from objProduct where sysID = '"+ UserModels.PMUser.UserSysID + "' and itemName in (" + temp + ")";
-            SqlDataAdapter da = new SqlDataAdapter(cmd);
-            da.Fill(NewTable);
-            da.Dispose();
-            cmd.Connection.Dispose();
-            return NewTable;
         }
         public static DataTable GetWorkPlanBars(string colName,string filter,string ordertype)
         {

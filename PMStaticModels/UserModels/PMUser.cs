@@ -7,6 +7,15 @@ using System.Data;
 
 namespace PMStaticModels.UserModels
 {
+    public class User {
+        public string EmpID { get; set; }
+        public string UserName { get; set; }
+        public string UserPass { get; set; }
+        public string UserWeb { get; set; }
+        public string UserIpAdress { get; set; }
+        public string UserGuid { get; set; }
+        public string UserSysID { get; set; }
+    }
     public static class PMUser
     {
         public static string EmpID { get; set; }
@@ -16,6 +25,7 @@ namespace PMStaticModels.UserModels
         public static string UserIpAdress { get; set; }
         public static string UserGuid { get; set; }
         public static string UserSysID { get; set; }
+        public static List<User> UserMessage = new List<User>();
         public static List<string> FunctionList;
 
         public static string GetuserGuid(string empID)
@@ -29,8 +39,6 @@ namespace PMStaticModels.UserModels
             rd.Close();            
             cmd.Connection.Dispose();            
             return userguid;
-        }
-       
+        }  
     }
-
 }
